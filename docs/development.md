@@ -2,7 +2,7 @@
 
 Python **FastAPI** — API server เชื่อม frontend กับสคริปต์ฟิสิกส์, simulation, และ LAIKA
 
-**Product context:** [../../frontend/docs/concept.md](../../frontend/docs/concept.md)  
+**Product context:** [../../frontend/docs/concept.md](../../frontend/docs/concept.md) · [functional-spec](../../frontend/docs/functional-spec.md)  
 **Docker dev:** [../../docs/docker-dev.md](../../docs/docker-dev.md) (compose อยู่ที่ workspace root)
 
 ## บทบาทหลัก
@@ -62,20 +62,19 @@ backend/
 ├── app/
 │   ├── __init__.py
 │   └── main.py              # FastAPI entry + /health (ขยายต่อได้)
-├── Dockerfile.dev           # dev image — อยู่ใน repo นี้
 ├── docs/
 ├── requirements.txt
 ├── .env.example
 └── README.md
 ```
 
-`compose.dev.yaml` อยู่ที่ **Lunar workspace root** (นอก git ของ FE/BE) — orchestrate ทั้งสอง service ในเครื่อง dev
+Dev Dockerfile อยู่ที่ workspace [`docker/backend.Dockerfile.dev`](../../docker/backend.Dockerfile.dev) — ดู [docker-dev.md](../../docs/docker-dev.md)
 
 ## Commands
 
 ```bash
 # Docker (จาก Lunar/)
-docker compose -f compose.dev.yaml up --build backend
+docker compose up --build backend
 
 # Local
 python -m venv .venv
@@ -107,6 +106,13 @@ Frontend เรียกผ่าน `NEXT_PUBLIC_API_URL` (หรือ equival
 - ไม่ import ข้าม repo — HTTP เท่านั้น
 - ฟิสิกส์/วงโคจรรันฝั่ง backend; frontend แสดงผล
 - Blockly block definitions อาจ share เป็น JSON schema ผ่าน API ไม่ใช่ shared package
+
+## Git
+
+- Dev บน **`develop`** — ห้าม push ตรงไป **`main`**
+- งานใหญ่: `feature/*` จาก `develop` → PR กลับ `develop`
+- Release: PR **`develop` → `main`**
+- ถ้ายังไม่มี `develop`: สร้างจาก `main` แล้ว push ครั้งเดียว (ดู [../../docs/git-workflow.md](../../docs/git-workflow.md))
 
 ## Boundaries
 

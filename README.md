@@ -12,7 +12,7 @@ Python **FastAPI** — API gateway, ฟิสิกส์อวกาศ, simula
 ### Docker (จาก `Lunar/` root)
 
 ```bash
-docker compose -f compose.dev.yaml up --build backend
+docker compose up --build backend
 ```
 
 ### Local

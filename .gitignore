@@ -35,5 +35,3 @@ Thumbs.db
 *.sqlite3
 data/
 logs/
-
-Dockerfile.dev
