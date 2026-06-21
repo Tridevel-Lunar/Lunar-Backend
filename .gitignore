@@ -37,4 +37,3 @@ data/
 logs/
 
 Dockerfile.dev
-.dockerignore
