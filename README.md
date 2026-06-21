@@ -24,7 +24,17 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-API: http://localhost:8000 · Health: http://localhost:8000/health
+API: http://localhost:8000 · Health: http://localhost:8000/health · Swagger: http://localhost:8000/docs
+
+## Tests
+
+```bash
+cd backend
+pip install -r requirements.txt
+pytest
+```
+
+pytest + FastAPI TestClient · SQLite in-memory (ไม่ต้อง Postgres) — ดู [docs/development.md](docs/development.md#testing)
 
 ## Stack (สรุป)
 
