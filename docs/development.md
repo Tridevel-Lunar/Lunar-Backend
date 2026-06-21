@@ -161,6 +161,30 @@ docker compose exec backend pytest
 - ฟิสิกส์/วงโคจรรันฝั่ง backend; frontend แสดงผล
 - Blockly block definitions อาจ share เป็น JSON schema ผ่าน API ไม่ใช่ shared package
 
+## Deploy (Render — Docker)
+
+Repo นี้มี `Dockerfile` สำหรับ **Render Web Service (Docker)** — โครงสร้างคล้าย dev image ใน workspace (`docker/backend.Dockerfile.dev`) แต่ไม่มี `--reload`
+
+| Render setting | ค่า |
+|----------------|-----|
+| Root directory | `.` (backend repo) |
+| Dockerfile path | `Dockerfile` |
+| Health check path | `/health` |
+
+**Environment variables** (ตั้งใน Render dashboard):
+
+| Variable | ตัวอย่าง |
+|----------|----------|
+| `DATABASE_URL` | `postgresql+psycopg://...` จาก Render PostgreSQL (Internal URL) |
+| `SECRET_KEY` | random string — ห้ามใช้ค่า dev |
+| `CORS_ORIGINS` | `https://your-frontend.vercel.app` |
+| `FRONTEND_URL` | URL frontend จริง (OAuth redirect กลับ) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | ถ้าเปิด Google OAuth |
+| `GOOGLE_REDIRECT_URI` | `https://<api-host>/auth/google/callback` |
+
+Container รัน `alembic upgrade head` ก่อน start ทุกครั้ง — ไม่ต้อง migrate แยก manual  
+Render ตั้ง `PORT` ให้อัตโนมัติ — Dockerfile อ่าน `${PORT:-8000}`
+
 ## Git
 
 - Dev บน **`develop`** — ห้าม push ตรงไป **`main`**

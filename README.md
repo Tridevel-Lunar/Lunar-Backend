@@ -26,6 +26,8 @@ uvicorn app.main:app --reload --port 8000
 
 API: http://localhost:8000 · Health: http://localhost:8000/health · Swagger: http://localhost:8000/docs
 
+Production deploy (Render Docker): ใช้ [`Dockerfile`](Dockerfile) ใน repo นี้ — ดู [docs/development.md](docs/development.md#deploy-render--docker)
+
 ## Tests
 
 ```bash
