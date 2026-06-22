@@ -79,7 +79,7 @@ backend/
 └── .env.example
 ```
 
-Dev Dockerfile อยู่ที่ workspace [`docker/backend.Dockerfile.dev`](../../docker/backend.Dockerfile.dev) — ดู [docker-dev.md](../../docs/docker-dev.md)
+Dev Dockerfile: [`Dockerfile.dev`](../Dockerfile.dev) — compose จาก workspace root ดู [docker-dev.md](../../docs/docker-dev.md)
 
 ## Commands
 
@@ -163,7 +163,7 @@ docker compose exec backend pytest
 
 ## Deploy (Render — Docker)
 
-Repo นี้มี `Dockerfile` สำหรับ **Render Web Service (Docker)** — โครงสร้างคล้าย dev image ใน workspace (`docker/backend.Dockerfile.dev`) แต่ไม่มี `--reload`
+Repo นี้มี `Dockerfile` สำหรับ **Render Web Service (Docker)** — โครงสร้างคล้าย `Dockerfile.dev` แต่ไม่มี `--reload`
 
 | Render setting | ค่า |
 |----------------|-----|
