@@ -1,10 +1,11 @@
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.config import get_settings
+from app.core.cookies import clear_auth_cookie, set_auth_cookie
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import ErrorResponse, LoginRequest, RegisterRequest, TokenResponse, UserRead
@@ -29,6 +30,16 @@ if _settings.google_oauth_enabled:
     )
 
 
+def _token_response_with_cookie(user: User, status_code: int) -> JSONResponse:
+    access_token = issue_token_for_user(user)
+    response = JSONResponse(
+        content=TokenResponse(access_token=access_token).model_dump(),
+        status_code=status_code,
+    )
+    set_auth_cookie(response, access_token)
+    return response
+
+
 @router.post(
     "/register",
     response_model=TokenResponse,
@@ -40,9 +51,9 @@ if _settings.google_oauth_enabled:
         422: {"description": "Validation error"},
     },
 )
-def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> TokenResponse:
+def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> JSONResponse:
     user = register_user(db, payload)
-    return TokenResponse(access_token=issue_token_for_user(user))
+    return _token_response_with_cookie(user, status.HTTP_201_CREATED)
 
 
 @router.post(
@@ -55,16 +66,27 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> TokenRe
         422: {"description": "Validation error"},
     },
 )
-def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
+def login(payload: LoginRequest, db: Session = Depends(get_db)) -> JSONResponse:
     user = authenticate_user(db, payload.email, payload.password)
-    return TokenResponse(access_token=issue_token_for_user(user))
+    return _token_response_with_cookie(user, status.HTTP_200_OK)
+
+
+@router.post(
+    "/logout",
+    summary="Logout",
+    description="Clear the session cookie.",
+)
+def logout() -> JSONResponse:
+    response = JSONResponse(content={"ok": True})
+    clear_auth_cookie(response)
+    return response
 
 
 @router.get(
     "/me",
     response_model=UserRead,
     summary="Get current user",
-    description="Return the authenticated user. Requires Bearer JWT (Authorize in Swagger).",
+    description="Return the authenticated user. Requires Bearer JWT or session cookie.",
     responses={401: {"model": ErrorResponse, "description": "Not authenticated"}},
 )
 def me(current_user: User = Depends(get_current_user)) -> User:
@@ -97,8 +119,8 @@ async def google_login(request: Request):
     "/google/callback",
     summary="Google OAuth callback",
     description=(
-        "Handles Google redirect, upserts the user, then redirects to the frontend "
-        "with `access_token` query param."
+        "Handles Google redirect, upserts the user, sets session cookie, "
+        "then redirects to the frontend Space module."
     ),
     responses={
         503: {"model": ErrorResponse, "description": "Google OAuth not configured"},
@@ -135,5 +157,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         display_name=userinfo.get("name"),
     )
     access_token = issue_token_for_user(user)
-    callback_url = f"{settings.frontend_url.rstrip('/')}/auth/callback"
-    return RedirectResponse(url=f"{callback_url}?access_token={access_token}")
+    space_url = f"{settings.frontend_url.rstrip('/')}/space"
+    response = RedirectResponse(url=space_url)
+    set_auth_cookie(response, access_token)
+    return response

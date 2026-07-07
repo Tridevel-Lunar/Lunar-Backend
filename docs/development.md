@@ -98,7 +98,7 @@ pytest
 ```
 
 **Default API URL:** `http://localhost:8000`  
-Frontend เรียกผ่าน `NEXT_PUBLIC_API_URL` (หรือ equivalent) ใน `.env` ของ frontend
+Frontend เรียก API ผ่าน prefix `/api` — Vite proxy strip แล้วส่งต่อ backend (`/api/auth/login` → `/auth/login`)
 
 ## API
 
@@ -145,7 +145,7 @@ docker compose exec backend pytest
 หลัง `docker compose up`:
 
 1. Swagger: http://localhost:8000/docs — register → Authorize → `/auth/me`
-2. Frontend: http://localhost:3000/register → dashboard → logout
+2. Frontend: http://localhost:3000/register → space → logout
 
 ## Code Style
 

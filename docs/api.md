@@ -6,15 +6,17 @@ Automated tests: `pytest` in `backend/` — see [development.md](development.md#
 
 ## Auth
 
-All auth routes are under `/auth`. Protected routes require header:
+All auth routes are under `/auth`. Protected routes accept either:
 
 ```
 Authorization: Bearer <access_token>
 ```
 
+or an httpOnly session cookie (`lunar_token`) set by login/register responses.
+
 ### POST `/auth/register`
 
-Create account with email and password.
+Create account with email and password. Sets session cookie on success.
 
 **Request**
 
@@ -35,11 +37,15 @@ Create account with email and password.
 }
 ```
 
+Also returns `Set-Cookie: lunar_token=...` (httpOnly).
+
 **Errors:** `409` email already registered · `422` validation
 
 ---
 
 ### POST `/auth/login`
+
+Sets session cookie on success.
 
 **Request**
 
@@ -65,7 +71,7 @@ Create account with email and password.
 
 ### GET `/auth/me`
 
-Returns current user. Use Swagger **Authorize** with `Bearer <token>`.
+Returns current user. Use Swagger **Authorize** with `Bearer <token>`, or call from browser with session cookie.
 
 **Response `200`**
 
@@ -82,15 +88,27 @@ Returns current user. Use Swagger **Authorize** with `Bearer <token>`.
 
 ---
 
+### POST `/auth/logout`
+
+Clears the session cookie.
+
+**Response `200`**
+
+```json
+{ "ok": true }
+```
+
+---
+
 ### GET `/auth/google`
 
 Browser redirect to Google OAuth. Requires `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in backend env.
 
 ### GET `/auth/google/callback`
 
-Google redirect target. Upserts user and redirects to:
+Google redirect target. Upserts user, sets session cookie, and redirects to:
 
-`{FRONTEND_URL}/auth/callback?access_token=<jwt>`
+`{FRONTEND_URL}/space`
 
 ---
 

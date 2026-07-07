@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
     frontend_url: str = "http://localhost:3000"
 
+    auth_cookie_name: str = "lunar_token"
+    auth_cookie_secure: bool = False
+
     google_client_id: str = ""
     google_client_secret: str = ""
     google_redirect_uri: str = "http://localhost:8000/auth/google/callback"

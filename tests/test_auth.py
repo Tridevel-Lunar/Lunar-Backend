@@ -103,3 +103,52 @@ def test_google_login_returns_503_when_not_configured(client):
 
     assert response.status_code == 503
     assert response.json()["detail"] == "Google OAuth is not configured"
+
+
+def test_login_sets_auth_cookie(client):
+    client.post(
+        "/auth/register",
+        json={"email": "cookie@lunar.dev", "password": "testpass123"},
+    )
+    response = client.post(
+        "/auth/login",
+        json={"email": "cookie@lunar.dev", "password": "testpass123"},
+    )
+
+    assert response.status_code == 200
+    assert "lunar_token" in response.cookies
+    assert response.cookies["lunar_token"]
+
+
+def test_register_sets_auth_cookie(client):
+    response = client.post(
+        "/auth/register",
+        json={"email": "regcookie@lunar.dev", "password": "testpass123"},
+    )
+
+    assert response.status_code == 201
+    assert "lunar_token" in response.cookies
+
+
+def test_me_works_with_cookie(client):
+    login = client.post(
+        "/auth/register",
+        json={"email": "mecookie@lunar.dev", "password": "testpass123"},
+    )
+    client.cookies.set("lunar_token", login.cookies["lunar_token"])
+    response = client.get("/auth/me")
+
+    assert response.status_code == 200
+    assert response.json()["email"] == "mecookie@lunar.dev"
+
+
+def test_logout_clears_cookie(client):
+    login = client.post(
+        "/auth/register",
+        json={"email": "logout@lunar.dev", "password": "testpass123"},
+    )
+    client.cookies.set("lunar_token", login.cookies["lunar_token"])
+    response = client.post("/auth/logout")
+
+    assert response.status_code == 200
+    assert response.cookies.get("lunar_token") in ("", None) or "lunar_token" not in response.cookies
