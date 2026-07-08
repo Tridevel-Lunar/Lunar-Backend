@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     def google_oauth_enabled(self) -> bool:
         return bool(self.google_client_id and self.google_client_secret)
 
+    @property
+    def google_onetap_enabled(self) -> bool:
+        return bool(self.google_client_id)
+
 
 @lru_cache
 def get_settings() -> Settings:

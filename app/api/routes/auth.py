@@ -8,13 +8,21 @@ from app.core.config import get_settings
 from app.core.cookies import clear_auth_cookie, set_auth_cookie
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.auth import ErrorResponse, LoginRequest, RegisterRequest, TokenResponse, UserRead
+from app.schemas.auth import (
+    ErrorResponse,
+    GoogleOneTapRequest,
+    LoginRequest,
+    RegisterRequest,
+    TokenResponse,
+    UserRead,
+)
 from app.services.auth import (
     authenticate_user,
     get_or_create_google_user,
     issue_token_for_user,
     register_user,
 )
+from app.services.google_auth import GoogleAuthError, verify_google_id_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 oauth = OAuth()
@@ -161,3 +169,41 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     response = RedirectResponse(url=space_url)
     set_auth_cookie(response, access_token)
     return response
+
+
+@router.post(
+    "/google/onetap",
+    response_model=TokenResponse,
+    summary="Sign in with Google One Tap",
+    description=(
+        "Verify a Google Identity Services credential JWT, upsert the user, "
+        "and set the session cookie."
+    ),
+    responses={
+        401: {"model": ErrorResponse, "description": "Invalid Google credential"},
+        503: {"model": ErrorResponse, "description": "Google sign-in not configured"},
+    },
+)
+def google_onetap(payload: GoogleOneTapRequest, db: Session = Depends(get_db)) -> JSONResponse:
+    settings = get_settings()
+    if not settings.google_onetap_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google sign-in is not configured",
+        )
+
+    try:
+        token_payload = verify_google_id_token(payload.credential)
+    except GoogleAuthError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(exc),
+        ) from exc
+
+    user = get_or_create_google_user(
+        db,
+        google_sub=token_payload["sub"],
+        email=token_payload["email"],
+        display_name=token_payload.get("name"),
+    )
+    return _token_response_with_cookie(user, status.HTTP_200_OK)

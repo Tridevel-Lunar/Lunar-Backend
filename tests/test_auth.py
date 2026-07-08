@@ -105,6 +105,13 @@ def test_google_login_returns_503_when_not_configured(client):
     assert response.json()["detail"] == "Google OAuth is not configured"
 
 
+def test_google_onetap_returns_503_when_not_configured(client):
+    response = client.post("/auth/google/onetap", json={"credential": "fake-token"})
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == "Google sign-in is not configured"
+
+
 def test_login_sets_auth_cookie(client):
     client.post(
         "/auth/register",

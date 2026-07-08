@@ -112,6 +112,33 @@ Google redirect target. Upserts user, sets session cookie, and redirects to:
 
 ---
 
+### POST `/auth/google/onetap`
+
+Google One Tap / Sign in with Google button. Verifies a GIS credential JWT, upserts the user, and sets the session cookie. Requires `GOOGLE_CLIENT_ID` in backend env (client secret not used).
+
+**Request**
+
+```json
+{
+  "credential": "<google-id-token>"
+}
+```
+
+**Response `200`**
+
+```json
+{
+  "access_token": "<jwt>",
+  "token_type": "bearer"
+}
+```
+
+Also returns `Set-Cookie: lunar_token=...` (httpOnly).
+
+**Errors:** `401` invalid credential · `503` Google sign-in not configured
+
+---
+
 ## Health
 
 ### GET `/health`

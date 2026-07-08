@@ -31,3 +31,7 @@ class UserRead(BaseModel):
 
 class ErrorResponse(BaseModel):
     detail: str
+
+
+class GoogleOneTapRequest(BaseModel):
+    credential: str = Field(min_length=1)
