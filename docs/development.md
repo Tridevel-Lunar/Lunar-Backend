@@ -83,32 +83,48 @@ Redirect callback ตรวจ `email_verified` เช่นเดียวก�
 - ถ้ามี email เดิมแต่ยังไม่มี `google_sub` → link บัญชี
 - ถ้า email ผูกกับ Google account อื่นแล้ว → `409 Conflict`
 
+### AI (LAIKA)
+
+```
+ผู้เรียน → Frontend → FastAPI → [RAG: LangChain] → LLM provider (Gemini/Groq/Ollama) → คำตอบ + sources
+```
+
+- RAG ลด hallucination — ตอบจากเอกสารวิศวกรรมอวกาศจริง
+- Assist prompt รวมชื่อผู้เรียน (จาก auth), เวลาปัจจุบัน, timestamp ประวัติแชท, และคำแนะนำความต่อเนื่องของบทสนทนา
+- API keys อยู่ใน `.env` เท่านั้น — ห้าม commit
+- รายละเอียดเต็ม: **[docs/laika.md](laika.md)** (providers, ingest, env)
+
 ## โครงสร้างปัจจุบัน
 
 ```
 Backend/
-├── alembic/                    # migrations (users table)
+├── alembic/                    # migrations
 ├── app/
 │   ├── api/
-│   │   ├── deps.py             # get_current_user (Bearer + cookie)
-│   │   └── routes/auth.py      # register, login, logout, me, google/*
-│   ├── core/
-│   │   ├── config.py           # Settings จาก .env
-│   │   ├── cookies.py          # lunar_token httpOnly cookie
-│   │   └── security.py         # JWT, password hash
+│   │   ├── deps.py             # get_current_user, admin guard
+│   │   └── routes/
+│   │       ├── auth.py         # register, login, logout, me, google/*
+│   │       ├── laika.py        # assist, stream, context usage
+│   │       ├── studio.py       # collections, conversation, branch map
+│   │       └── backoffice.py   # knowledge admin
+│   ├── core/config.py, cookies.py, security.py
 │   ├── db/session.py, base.py
-│   ├── models/user.py
-│   ├── schemas/auth.py
+│   ├── models/user.py, knowledge_*.py, studio_collection.py
+│   ├── schemas/auth.py, laika.py, studio.py, backoffice.py
 │   ├── services/
-│   │   ├── auth.py             # register, login, get_or_create_google_user
-│   │   └── google_auth.py      # verify_google_id_token
+│   │   ├── auth.py, google_auth.py, rbac.py, user_admin.py
+│   │   ├── laika.py, studio.py, studio_tree.py, knowledge/
+│   │   └── rag/                # providers, retriever, chain, context_window
 │   └── main.py
-├── docs/api.md, development.md
+├── data/knowledge/             # RAG corpus + manifest.yaml
+├── scripts/                    # ingest, sync manifest
+├── docs/api.md, laika.md, development.md
 ├── tests/
 │   ├── conftest.py
-│   ├── test_auth.py            # 19 tests
-│   ├── test_health.py
-│   └── test_security.py
+│   ├── test_auth.py
+│   ├── test_laika.py, test_laika_context.py, test_laika_providers.py
+│   ├── test_studio.py, test_backoffice.py, test_rbac.py
+│   └── test_health.py, test_security.py
 ├── Dockerfile, Dockerfile.dev
 ├── requirements.txt
 └── .env                        # ไม่ commit
@@ -179,6 +195,10 @@ Backend ใช้ **pytest** + FastAPI `TestClient` — unit/API tests ใช้
 | `tests/test_health.py` | `GET /health` |
 | `tests/test_security.py` | password hash/verify, JWT create/decode |
 | `tests/test_auth.py` | register, login, cookies, `/auth/me`, logout, Google One Tap (mocked), 401/409/503 |
+| `tests/test_laika.py` | `/laika/health`, `/laika/assist`, sources[], 503 when disabled |
+| `tests/test_laika_context.py` | Context usage, history timestamps, learner name in prompt |
+| `tests/test_studio.py` | Studio collections + conversation/branch APIs |
+| `tests/test_laika_providers.py` | Provider factory validation |
 
 ### หมายเหตุ
 
