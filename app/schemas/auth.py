@@ -24,6 +24,7 @@ class UserRead(BaseModel):
     id: UUID
     email: EmailStr
     display_name: str | None
+    role: str
     created_at: datetime
 
     model_config = {"from_attributes": True}

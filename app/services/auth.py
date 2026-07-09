@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models.user import User
 from app.schemas.auth import RegisterRequest
+from app.services.rbac import ROLE_LEARNER, apply_admin_bootstrap
 
 
 def get_user_by_email(db: Session, email: str) -> User | None:
@@ -31,11 +32,12 @@ def register_user(db: Session, payload: RegisterRequest) -> User:
         email=payload.email.lower(),
         hashed_password=hash_password(payload.password),
         display_name=payload.display_name,
+        role=ROLE_LEARNER,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
-    return user
+    return apply_admin_bootstrap(db, user)
 
 
 def authenticate_user(db: Session, email: str, password: str) -> User:
@@ -50,7 +52,7 @@ def authenticate_user(db: Session, email: str, password: str) -> User:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
-    return user
+    return apply_admin_bootstrap(db, user)
 
 
 def issue_token_for_user(user: User) -> str:
@@ -70,7 +72,7 @@ def get_or_create_google_user(
             user.display_name = display_name
             db.commit()
             db.refresh(user)
-        return user
+        return apply_admin_bootstrap(db, user)
 
     normalized_email = email.lower()
     existing = get_user_by_email(db, normalized_email)
@@ -85,15 +87,16 @@ def get_or_create_google_user(
             existing.display_name = display_name
         db.commit()
         db.refresh(existing)
-        return existing
+        return apply_admin_bootstrap(db, existing)
 
     user = User(
         email=normalized_email,
         google_sub=google_sub,
         display_name=display_name,
         hashed_password=None,
+        role=ROLE_LEARNER,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
-    return user
+    return apply_admin_bootstrap(db, user)
