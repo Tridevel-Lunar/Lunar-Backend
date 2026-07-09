@@ -159,3 +159,85 @@ def test_logout_clears_cookie(client):
 
     assert response.status_code == 200
     assert response.cookies.get("lunar_token") in ("", None) or "lunar_token" not in response.cookies
+
+
+def test_google_onetap_invalid_credential_returns_401(client, google_client_id, monkeypatch):
+    from app.services.google_auth import GoogleAuthError
+
+    def mock_verify(_credential: str) -> dict:
+        raise GoogleAuthError("Invalid Google credential")
+
+    monkeypatch.setattr("app.api.routes.auth.verify_google_id_token", mock_verify)
+
+    response = client.post("/auth/google/onetap", json={"credential": "fake-token"})
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Invalid Google credential"
+
+
+def test_google_onetap_success_creates_user(client, google_client_id, google_token_payload, monkeypatch):
+    monkeypatch.setattr(
+        "app.api.routes.auth.verify_google_id_token",
+        lambda _credential: google_token_payload,
+    )
+
+    response = client.post("/auth/google/onetap", json={"credential": "valid-token"})
+
+    assert response.status_code == 200
+    assert response.json()["access_token"]
+    assert response.cookies["lunar_token"]
+
+    client.cookies.set("lunar_token", response.cookies["lunar_token"])
+    me = client.get("/auth/me")
+    assert me.status_code == 200
+    assert me.json()["email"] == "google@lunar.dev"
+    assert me.json()["display_name"] == "Google User"
+
+
+def test_google_onetap_links_existing_email_account(
+    client, google_client_id, google_token_payload, monkeypatch
+):
+    client.post(
+        "/auth/register",
+        json={"email": "google@lunar.dev", "password": "testpass123", "display_name": "Local User"},
+    )
+
+    monkeypatch.setattr(
+        "app.api.routes.auth.verify_google_id_token",
+        lambda _credential: google_token_payload,
+    )
+
+    response = client.post("/auth/google/onetap", json={"credential": "valid-token"})
+
+    assert response.status_code == 200
+    client.cookies.set("lunar_token", response.cookies["lunar_token"])
+    me = client.get("/auth/me")
+    assert me.status_code == 200
+    assert me.json()["email"] == "google@lunar.dev"
+    assert me.json()["display_name"] == "Local User"
+
+
+def test_google_onetap_conflict_when_email_linked_to_other_google(
+    client, db, google_client_id, google_token_payload, monkeypatch
+):
+    from app.models.user import User
+
+    db.add(
+        User(
+            email="google@lunar.dev",
+            google_sub="other-google-sub",
+            hashed_password=None,
+            display_name="Other Google",
+        )
+    )
+    db.commit()
+
+    monkeypatch.setattr(
+        "app.api.routes.auth.verify_google_id_token",
+        lambda _credential: google_token_payload,
+    )
+
+    response = client.post("/auth/google/onetap", json={"credential": "valid-token"})
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Email already linked to another account"

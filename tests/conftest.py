@@ -50,6 +50,26 @@ def client(db: Session):
 
 
 @pytest.fixture()
+def google_client_id(monkeypatch):
+    monkeypatch.setenv("GOOGLE_CLIENT_ID", "test-client-id.apps.googleusercontent.com")
+    from app.core.config import get_settings
+
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
+
+
+@pytest.fixture()
+def google_token_payload() -> dict:
+    return {
+        "sub": "google-sub-123",
+        "email": "google@lunar.dev",
+        "email_verified": True,
+        "name": "Google User",
+    }
+
+
+@pytest.fixture()
 def auth_headers(client: TestClient) -> dict[str, str]:
     response = client.post(
         "/auth/register",
