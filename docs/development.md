@@ -1,19 +1,21 @@
 # LUNAR Backend
 
-Python **FastAPI** — API server เชื่อม frontend กับสคริปต์ฟิสิกส์, simulation, และ LAIKA
+Python **FastAPI** — API server เชื่อม frontend กับ auth, ฟิสิกส์, simulation, และ LAIKA
 
-**Product context:** [../../frontend/docs/concept.md](../../frontend/docs/concept.md) · [functional-spec](../../frontend/docs/functional-spec.md)  
-**Docker dev:** [../../docs/docker-dev.md](../../docs/docker-dev.md) (compose อยู่ที่ workspace root)
+**Product context:** [../Frontend/docs/concept.md](../Frontend/docs/concept.md) · [functional-spec](../Frontend/docs/functional-spec.md)  
+**API contract:** [api.md](api.md)  
+**Frontend dev:** [../Frontend/docs/development.md](../Frontend/docs/development.md)
 
 ## บทบาทหลัก
 
-| หน้าที่ | รายละเอียด |
-|---------|------------|
-| **API Gateway** | รับ request จาก frontend — รันบล็อกโค้ด, ส่งผล simulation กลับ |
-| **Orbital / Physics** | คำนวณสมการฟิสิกส์อวกาศ, วงโคจร, power budget |
-| **Logging** | โครงสร้างข้อมูล log จากการจำลอง |
-| **LAIKA** | LLM (Gemini) + RAG ให้คำแนะนำผู้เรียน |
-| **Satellite imagery** | ส่งข้อมูลภาพดาวเทียมกลับ frontend (เมื่อมี) |
+| หน้าที่ | รายละเอียด | สถานะ |
+|---------|------------|--------|
+| **Authentication** | register, login, logout, JWT + httpOnly cookie, Google Sign-In | ✓ |
+| **API Gateway** | รับ request จาก frontend — รันบล็อกโค้ด, ส่งผล simulation กลับ | planned |
+| **Orbital / Physics** | คำนวณสมการฟิสิกส์อวกาศ, วงโคจร, power budget | planned |
+| **Logging** | โครงสร้างข้อมูล log จากการจำลอง | planned |
+| **LAIKA** | LLM (Gemini) + RAG ให้คำแนะนำผู้เรียน | planned |
+| **Satellite imagery** | ส่งข้อมูลภาพดาวเทียมกลับ frontend | planned |
 
 ## Tech Stack
 
@@ -21,149 +23,196 @@ Python **FastAPI** — API server เชื่อม frontend กับสคร
 
 | ภาษา | การใช้งาน |
 |------|-----------|
-| **Python** | ภาษาหลัก — สมการฟิสิกส์อวกาศ, วงโคจร, โครงสร้างข้อมูล log |
+| **Python** | ภาษาหลัก — API, auth, สมการฟิสิกส์อวกาศ, วงโคจร |
 
-### Framework & Libraries
+### Framework & Libraries (ใช้อยู่)
 
 | เครื่องมือ | บทบาท |
 |-----------|--------|
-| **FastAPI** | API server / gateway |
-| **PostgreSQL** | ฐานข้อมูลหลัก — users, portfolios, simulation logs, ฯลฯ |
-| **SQLAlchemy** + **Alembic** | ORM + migrations (เมื่อ implement) |
-| **Poliastro** | คำนวณและจำลองวงโคจรดาวเทียม (orbital mechanics, Kepler) |
-| **PyEphem** | ทางเลือก/เสริม — ตำแหน่งดาราศาสตร์, ephemeris |
-| **Gemini API** (Google AI SDK) | LLM หลักของ LAIKA — วิเคราะห์ไอเดีย, สร้างกล่องคำพูดแนะนำ |
-| **LangChain** หรือ **LlamaIndex** | RAG — ดึงฐานความรู้ (เช่น NASA CubeSat 101 PDF) มาอ้างอิงก่อนตอบ |
+| **FastAPI** | API server |
+| **PostgreSQL** + **SQLAlchemy** + **Alembic** | users, migrations |
+| **passlib** / **bcrypt** | password hashing |
+| **python-jose** | JWT access tokens |
+| **Authlib** | Google OAuth redirect flow (`/auth/google`) |
+| **google-auth** | verify GIS / One Tap credential JWT |
+| **pydantic-settings** | `.env` configuration |
+
+### วางแผน
+
+| เครื่องมือ | บทบาท |
+|-----------|--------|
+| **Poliastro** | orbital mechanics, Kepler |
+| **PyEphem** | ephemeris / ตำแหน่งดาราศาสตร์ |
+| **Gemini API** | LLM หลักของ LAIKA |
+| **LangChain** หรือ **LlamaIndex** | RAG |
 
 > ไม่ใช้ Node.js/Express — backend เป็น Python + FastAPI เท่านั้น
 
-### AI (LAIKA)
+## Authentication
+
+### Email / password
+
+- `POST /auth/register` — สร้าง user, คืน JWT + Set-Cookie
+- `POST /auth/login` — ตรวจ email/password, Set-Cookie
+- `POST /auth/logout` — ลบ cookie
+- `GET /auth/me` — ต้องมี Bearer token หรือ cookie `lunar_token`
+
+### Google Sign-In
+
+สอง flow บน backend:
+
+| Flow | Endpoint | ต้องการ env |
+|------|----------|-------------|
+| **One Tap / GIS button** (frontend ใช้หลัก) | `POST /auth/google/onetap` | `GOOGLE_CLIENT_ID` |
+| **Browser redirect** (optional) | `GET /auth/google` → `/auth/google/callback` | `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` + `GOOGLE_REDIRECT_URI` |
+
+One Tap flow:
 
 ```
-ผู้เรียน → Frontend → FastAPI → [RAG: LangChain/LlamaIndex] → Gemini API → คำตอบ
-                                      ↑
-                              NASA docs, CubeSat 101, ฯลฯ
+Frontend credential JWT
+  → verify_google_id_token()  (google-auth, audience = GOOGLE_CLIENT_ID)
+  → get_or_create_google_user()  (link by google_sub or email)
+  → Set-Cookie lunar_token
 ```
 
-- RAG ลด hallucination — ตอบจากเอกสารวิศวกรรมอวกาศจริง
-- API keys อยู่ใน `.env` เท่านั้น — ห้าม commit
+Redirect callback ตรวจ `email_verified` เช่นเดียวกับ One Tap
 
-### Database
+### Account linking
 
-- **PostgreSQL** — ต่อผ่าน `DATABASE_URL` ใน `backend/.env`
-- Dev (Docker): `postgresql://lunar:lunar@postgres:5432/lunar` (compose ตั้งให้)
-- Dev (backend local): `postgresql://lunar:lunar@localhost:5432/lunar`
-- Migrations: **Alembic** — `alembic upgrade head` (Docker entrypoint runs this on start)
+- ค้นหา user จาก `google_sub` ก่อน
+- ถ้ามี email เดิมแต่ยังไม่มี `google_sub` → link บัญชี
+- ถ้า email ผูกกับ Google account อื่นแล้ว → `409 Conflict`
 
 ## โครงสร้างปัจจุบัน
 
 ```
-backend/
-├── alembic/
+Backend/
+├── alembic/                    # migrations (users table)
 ├── app/
-│   ├── api/routes/auth.py
-│   ├── core/config.py, security.py
-│   ├── db/session.py
+│   ├── api/
+│   │   ├── deps.py             # get_current_user (Bearer + cookie)
+│   │   └── routes/auth.py      # register, login, logout, me, google/*
+│   ├── core/
+│   │   ├── config.py           # Settings จาก .env
+│   │   ├── cookies.py          # lunar_token httpOnly cookie
+│   │   └── security.py         # JWT, password hash
+│   ├── db/session.py, base.py
 │   ├── models/user.py
 │   ├── schemas/auth.py
-│   ├── services/auth.py
+│   ├── services/
+│   │   ├── auth.py             # register, login, get_or_create_google_user
+│   │   └── google_auth.py      # verify_google_id_token
 │   └── main.py
-├── docs/api.md
-├── pytest.ini
+├── docs/api.md, development.md
 ├── tests/
 │   ├── conftest.py
-│   ├── test_auth.py
+│   ├── test_auth.py            # 19 tests
 │   ├── test_health.py
 │   └── test_security.py
+├── Dockerfile, Dockerfile.dev
 ├── requirements.txt
-└── .env.example
+└── .env                        # ไม่ commit
 ```
 
-Dev Dockerfile: [`Dockerfile.dev`](../Dockerfile.dev) — compose จาก workspace root ดู [docker-dev.md](../../docs/docker-dev.md)
+## Environment
+
+สร้าง `Backend/.env` (ห้าม commit):
+
+| Variable | Default (dev) | หมายเหตุ |
+|----------|---------------|----------|
+| `DATABASE_URL` | `postgresql+psycopg://lunar:lunar@localhost:5432/lunar` | ต้องมี Postgres รัน — auth ล้มเหลวถ้า DB down |
+| `SECRET_KEY` | — | เปลี่ยนใน production |
+| `CORS_ORIGINS` | `http://localhost:3000` | คั่นหลาย origin ด้วย comma |
+| `FRONTEND_URL` | `http://localhost:3000` | redirect หลัง Google OAuth callback |
+| `GOOGLE_CLIENT_ID` | _(ว่าง)_ | เปิด Google Sign-In |
+| `GOOGLE_CLIENT_SECRET` | _(ว่าง)_ | สำหรับ redirect OAuth เท่านั้น |
+| `GOOGLE_REDIRECT_URI` | `http://localhost:8000/auth/google/callback` | ต้องตรงกับ Google Cloud Console |
+| `AUTH_COOKIE_SECURE` | `false` | ตั้ง `true` ใน production (HTTPS) |
+
+`GOOGLE_CLIENT_ID` ต้องตรงกับ `VITE_GOOGLE_CLIENT_ID` บน frontend
+
+### Google Cloud Console (dev)
+
+1. OAuth client type: **Web application**
+2. **Authorized JavaScript origins:** `http://localhost:3000`, `http://127.0.0.1:3000`
+3. **Authorized redirect URIs:** `http://localhost:8000/auth/google/callback` (ถ้าใช้ redirect flow)
+4. OAuth consent screen: **External** + test users (ถ้าอยู่ใน Testing mode)
 
 ## Commands
 
 ```bash
-# Docker (จาก Lunar/)
-docker compose up --build backend
-
 # Local
-python -m venv .venv
-.venv\Scripts\activate          # Windows
+python -m venv .lunar-be-venv
+.lunar-be-venv\Scripts\activate          # Windows
 pip install -r requirements.txt
+alembic upgrade head
 uvicorn app.main:app --reload --port 8000
 
-# Tests
+# Tests (ไม่ต้อง Postgres)
 pytest
+pytest -v
+pytest tests/test_auth.py
+
+# Docker (optional — workspace root)
+docker compose up --build backend
+docker compose exec backend pytest
 ```
 
 **Default API URL:** `http://localhost:8000`  
-Frontend เรียก API ผ่าน prefix `/api` — Vite proxy strip แล้วส่งต่อ backend (`/api/auth/login` → `/auth/login`)
+Frontend เรียกผ่าน `/api` — Vite proxy strip prefix (`/api/auth/login` → `/auth/login`)
 
 ## API
 
 - **Swagger UI:** http://localhost:8000/docs
-- Contract summary: [docs/api.md](docs/api.md)
+- **ReDoc:** http://localhost:8000/redoc
+- Contract summary: [api.md](api.md)
 
 ## Testing
 
-Backend ใช้ **pytest** + FastAPI `TestClient` — ไม่ต้องรัน Postgres/Docker สำหรับ unit/API tests (ใช้ SQLite in-memory)
-
-### รันเทส
-
-```bash
-cd backend
-pip install -r requirements.txt
-pytest              # ทั้งหมด
-pytest -v           # verbose
-pytest tests/test_auth.py   # ไฟล์เดียว
-```
-
-จาก workspace root (backend container ยังรันอยู่):
-
-```bash
-docker compose exec backend pytest
-```
+Backend ใช้ **pytest** + FastAPI `TestClient` — unit/API tests ใช้ **SQLite in-memory** (ไม่ต้องรัน Postgres)
 
 ### โครงสร้าง
 
 | ไฟล์ | ครอบคลุม |
 |------|-----------|
-| `tests/conftest.py` | SQLite in-memory DB, `client` fixture, `auth_headers` |
+| `tests/conftest.py` | SQLite DB, `client`, `auth_headers`, `google_client_id`, `google_token_payload` |
 | `tests/test_health.py` | `GET /health` |
 | `tests/test_security.py` | password hash/verify, JWT create/decode |
-| `tests/test_auth.py` | register, login, `/auth/me`, 409 duplicate, 401 invalid, Google 503 |
+| `tests/test_auth.py` | register, login, cookies, `/auth/me`, logout, Google One Tap (mocked), 401/409/503 |
 
 ### หมายเหตุ
 
 - เทส override `get_db` — ไม่แตะ PostgreSQL จริง
-- env ในเทส: `SECRET_KEY`, `GOOGLE_CLIENT_*` ว่าง (OAuth disabled)
+- Google tests mock `verify_google_id_token` — ไม่เรียก Google API จริง
+- env เริ่มต้นในเทส: `GOOGLE_CLIENT_*` ว่าง (503 when unconfigured)
 - เพิ่ม endpoint ใหม่ → เพิ่มเทสใน `tests/` ก่อน merge PR
 
-### Manual / E2E (optional)
+### Manual / E2E
 
-หลัง `docker compose up`:
+1. รัน PostgreSQL + `alembic upgrade head` + uvicorn
+2. Swagger: http://localhost:8000/docs — register → `/auth/me`
+3. Frontend: http://localhost:3000/register → Google หรือ email → `/space`
 
-1. Swagger: http://localhost:8000/docs — register → Authorize → `/auth/me`
-2. Frontend: http://localhost:3000/register → space → logout
+**ข้อผิดพลาดที่พบบ่อย:** Google login ผ่าน GIS แล้ว แต่ `POST /auth/google/onetap` 500 — มักเป็น **PostgreSQL ไม่รัน**
 
 ## Code Style
 
 - Python 3.11+
 - Type hints บน function signatures
-- Async endpoints เมื่อเหมาะสม
+- Async endpoints สำหรับ OAuth redirect; sync สำหรับ DB-heavy auth handlers
 - Comments และ docstrings ภาษา**อังกฤษ**
 - ชื่อ product: **LAIKA**, **Space**, **Arena**, **Studio**
 
 ## Frontend ↔ Backend
 
 - ไม่ import ข้าม repo — HTTP เท่านั้น
+- Session: httpOnly cookie `lunar_token` (`credentials: "include"` บน frontend)
 - ฟิสิกส์/วงโคจรรันฝั่ง backend; frontend แสดงผล
 - Blockly block definitions อาจ share เป็น JSON schema ผ่าน API ไม่ใช่ shared package
 
 ## Deploy (Render — Docker)
 
-Repo นี้มี `Dockerfile` สำหรับ **Render Web Service (Docker)** — โครงสร้างคล้าย `Dockerfile.dev` แต่ไม่มี `--reload`
+Repo นี้มี `Dockerfile` สำหรับ **Render Web Service (Docker)**
 
 | Render setting | ค่า |
 |----------------|-----|
@@ -175,33 +224,35 @@ Repo นี้มี `Dockerfile` สำหรับ **Render Web Service (Docke
 
 | Variable | ตัวอย่าง |
 |----------|----------|
-| `DATABASE_URL` | `postgresql+psycopg://...` จาก Render PostgreSQL (Internal URL) |
+| `DATABASE_URL` | `postgresql+psycopg://...` จาก Render PostgreSQL |
 | `SECRET_KEY` | random string — ห้ามใช้ค่า dev |
 | `CORS_ORIGINS` | `https://your-frontend.vercel.app` |
-| `FRONTEND_URL` | URL frontend จริง (OAuth redirect กลับ) |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | ถ้าเปิด Google OAuth |
+| `FRONTEND_URL` | URL frontend จริง |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth |
 | `GOOGLE_REDIRECT_URI` | `https://<api-host>/auth/google/callback` |
+| `AUTH_COOKIE_SECURE` | `true` |
 
-Container รัน `alembic upgrade head` ก่อน start ทุกครั้ง — ไม่ต้อง migrate แยก manual  
-Render ตั้ง `PORT` ให้อัตโนมัติ — Dockerfile อ่าน `${PORT:-8000}`
+Container รัน `alembic upgrade head` ก่อน start — Dockerfile อ่าน `${PORT:-8000}`
 
 ## Git
 
 - Dev บน **`develop`** — ห้าม push ตรงไป **`main`**
 - งานใหญ่: `feature/*` จาก `develop` → PR กลับ `develop`
 - Release: PR **`develop` → `main`**
-- ถ้ายังไม่มี `develop`: สร้างจาก `main` แล้ว push ครั้งเดียว (ดู [../../docs/git-workflow.md](../../docs/git-workflow.md))
+- Remote ปัจจุบัน: `Lunar-Backend-2` (แยก repo จาก backend เดิม)
 
 ## Boundaries
 
 - ห้าม commit `.env`, Gemini API keys, หรือ RAG index ที่มีข้อมูลลับ
 - ห้ามรัน LLM calls จาก frontend
 - อย่าเพิ่ม Node.js runtime ใน backend repo
+- `GOOGLE_CLIENT_SECRET` ใช้ backend เท่านั้น — ห้ามใส่ใน frontend
 
 ## JIT Index
 
 ```bash
-# (เมื่อมี code)
 rg --files -g "*.py" app/
 rg "router\\.|APIRouter" app/
+rg "google_onetap|verify_google_id_token" app/
+rg "GOOGLE_CLIENT" app/core/config.py
 ```
