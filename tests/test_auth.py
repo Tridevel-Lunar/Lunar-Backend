@@ -88,6 +88,7 @@ def test_me_returns_current_user(client, auth_headers):
     data = response.json()
     assert data["email"] == "pytest@lunar.dev"
     assert data["display_name"] == "Pytest User"
+    assert data["role"] == "learner"
     assert "id" in data
     assert "created_at" in data
 
