@@ -131,6 +131,9 @@ def build_human_prompt(
     return "\n\n".join(parts)
 
 
+WEB_SEARCH_TOKEN_ESTIMATE = 600  # ~3 DuckDuckGo results
+
+
 def compute_context_usage(
     settings: Settings,
     *,
@@ -140,6 +143,7 @@ def compute_context_usage(
     draft: str = "",
     messages: list[ChatMessage] | None = None,
     learning_context: dict[str, object] | None = None,
+    web_search: bool = False,
 ) -> ContextUsage:
     context_window = resolve_context_window(settings)
     reserved_output = settings.laika_reserved_output_tokens
@@ -154,6 +158,8 @@ def compute_context_usage(
         + estimate_tokens(pending)
         + 48
     )
+    if web_search:
+        fixed_tokens += WEB_SEARCH_TOKEN_ESTIMATE
 
     history_budget = max(0, settings.laika_max_history_tokens)
     history_budget = min(history_budget, max(0, input_budget - fixed_tokens))
@@ -168,6 +174,10 @@ def compute_context_usage(
         ContextSegment("learning", "Learning progress", estimate_learning_tokens(learning_context)),
         ContextSegment("entry", "โน้ตต้นทาง", estimate_tokens(entry_content.strip())),
     ]
+    if web_search:
+        segments.append(
+            ContextSegment("web", "ค้นหาจากอินเทอร์เน็ต", WEB_SEARCH_TOKEN_ESTIMATE)
+        )
     segments.append(ContextSegment("history", "ประวัติแชท", history_tokens))
     if pending:
         label = "กำลังพิมพ์" if draft.strip() else "ข้อความถัดไป"

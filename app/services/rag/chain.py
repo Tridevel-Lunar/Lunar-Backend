@@ -17,6 +17,7 @@ from app.services.rag.providers import get_llm
 from app.services.rag.retriever import PgVectorRetriever
 from app.services.rag.sources import build_sources
 from app.services.rag.status import LaikaStatusPhase
+from app.services.rag.web_search import format_web_results, search_web, web_results_to_sources
 
 StreamDonePayload = dict[str, Any]
 
@@ -90,12 +91,18 @@ class RagChain:
         self._llm = get_llm(settings)
 
     def _build_messages(
-        self, request: AssistRequest, chunks: list[RetrievedChunk]
+        self,
+        request: AssistRequest,
+        chunks: list[RetrievedChunk],
+        *,
+        web_context: str = "",
     ) -> list[BaseMessage]:
         from app.services.rag.prompts import format_context
 
         trimmed_request, _ = trim_request_history(self._settings, request)
         rag_context = format_context(chunks)
+        if web_context:
+            rag_context = f"{rag_context}\n\n## Web search results\n\n{web_context}"
         system_prompt = INTENT_SYSTEM_PROMPTS[trimmed_request.intent]
         human_prompt = build_human_prompt(
             trimmed_request,
@@ -107,16 +114,27 @@ class RagChain:
             HumanMessage(content=human_prompt),
         ]
 
-    def _prepare(self, request: AssistRequest) -> tuple[list[BaseMessage], list[RetrievedChunk]]:
+    def _prepare(
+        self, request: AssistRequest
+    ) -> tuple[list[BaseMessage], list[RetrievedChunk], list[LaikaSource]]:
         query = f"{request.intent}: {request.content}"
         chunks = self._retriever.retrieve(query)
-        return self._build_messages(request, chunks), chunks
+
+        web_sources: list[LaikaSource] = []
+        web_context = ""
+        if request.web_search:
+            web_results = search_web(query, max_results=3)
+            web_context = format_web_results(web_results)
+            web_sources = web_results_to_sources(web_results)
+
+        return self._build_messages(request, chunks, web_context=web_context), chunks, web_sources
 
     def run(self, request: AssistRequest) -> AssistResponse:
-        messages, chunks = self._prepare(request)
+        messages, chunks, web_sources = self._prepare(request)
         response = self._llm.invoke(messages)
         text = _chunk_text(response.content)
-        return AssistResponse(response=text.strip(), sources=build_sources(chunks))
+        all_sources = build_sources(chunks) + web_sources
+        return AssistResponse(response=text.strip(), sources=all_sources)
 
     def stream(
         self,
@@ -135,10 +153,18 @@ class RagChain:
         if _is_cancelled(cancel_event):
             return
 
+        web_sources: list[LaikaSource] = []
+        web_context = ""
+        if request.web_search:
+            yield ("status", "searching_web")
+            web_results = search_web(query, max_results=3)
+            web_context = format_web_results(web_results)
+            web_sources = web_results_to_sources(web_results)
+
         yield ("status", "searching")
         chunks = self._retriever.search(query_vector)
-        messages = self._build_messages(request, chunks)
-        sources = build_sources(chunks)
+        messages = self._build_messages(request, chunks, web_context=web_context)
+        sources = build_sources(chunks) + web_sources
 
         if _is_cancelled(cancel_event):
             return

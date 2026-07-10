@@ -47,6 +47,7 @@ class AssistRequest(BaseModel):
     messages: list[ChatMessage] = Field(default_factory=list)
     client_now: str | None = None
     learner_display_name: str | None = None
+    web_search: bool = False
 
     @field_validator("messages", mode="before")
     @classmethod
@@ -110,6 +111,7 @@ class ContextUsageRequest(BaseModel):
     draft: str = ""
     messages: list[ChatMessage] = Field(default_factory=list)
     learning_context: LearningContext | None = None
+    web_search: bool = False
 
 
 class ContextUsageResponse(BaseModel):
