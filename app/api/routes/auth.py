@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.config import get_settings
-from app.core.cookies import clear_auth_cookie, set_auth_cookie
+from app.core.cookies import clear_auth_cookies, set_auth_cookie, set_refresh_cookie
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import (
@@ -23,6 +23,7 @@ from app.services.auth import (
     register_user,
 )
 from app.services.google_auth import GoogleAuthError, verify_google_id_token
+from app.services.refresh_token import create_refresh_token, revoke_refresh_token, rotate_refresh_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 oauth = OAuth()
@@ -38,13 +39,15 @@ if _settings.google_oauth_enabled:
     )
 
 
-def _token_response_with_cookie(user: User, status_code: int) -> JSONResponse:
+def _token_response_with_cookie(user: User, db: Session, status_code: int) -> JSONResponse:
     access_token = issue_token_for_user(user)
+    refresh_token = create_refresh_token(db, user.id)
     response = JSONResponse(
         content=TokenResponse(access_token=access_token).model_dump(),
         status_code=status_code,
     )
     set_auth_cookie(response, access_token)
+    set_refresh_cookie(response, refresh_token)
     return response
 
 
@@ -61,7 +64,7 @@ def _token_response_with_cookie(user: User, status_code: int) -> JSONResponse:
 )
 def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> JSONResponse:
     user = register_user(db, payload)
-    return _token_response_with_cookie(user, status.HTTP_201_CREATED)
+    return _token_response_with_cookie(user, db, status.HTTP_201_CREATED)
 
 
 @router.post(
@@ -76,17 +79,49 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> JSONRes
 )
 def login(payload: LoginRequest, db: Session = Depends(get_db)) -> JSONResponse:
     user = authenticate_user(db, payload.email, payload.password)
-    return _token_response_with_cookie(user, status.HTTP_200_OK)
+    return _token_response_with_cookie(user, db, status.HTTP_200_OK)
+
+
+@router.post(
+    "/refresh",
+    response_model=TokenResponse,
+    summary="Refresh access token",
+    description=(
+        "Exchange a valid refresh token cookie for a new access token. "
+        "Rotates the refresh token on success."
+    ),
+    responses={401: {"model": ErrorResponse, "description": "Invalid or expired refresh token"}},
+)
+def refresh_session(request: Request, db: Session = Depends(get_db)) -> JSONResponse:
+    settings = get_settings()
+    refresh_token = request.cookies.get(settings.refresh_cookie_name)
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token missing",
+        )
+
+    user, new_refresh_token = rotate_refresh_token(db, refresh_token)
+    access_token = issue_token_for_user(user)
+    response = JSONResponse(content=TokenResponse(access_token=access_token).model_dump())
+    set_auth_cookie(response, access_token)
+    set_refresh_cookie(response, new_refresh_token)
+    return response
 
 
 @router.post(
     "/logout",
     summary="Logout",
-    description="Clear the session cookie.",
+    description="Revoke refresh token and clear session cookies.",
 )
-def logout() -> JSONResponse:
+def logout(request: Request, db: Session = Depends(get_db)) -> JSONResponse:
+    settings = get_settings()
+    refresh_token = request.cookies.get(settings.refresh_cookie_name)
+    if refresh_token:
+        revoke_refresh_token(db, refresh_token)
+
     response = JSONResponse(content={"ok": True})
-    clear_auth_cookie(response)
+    clear_auth_cookies(response)
     return response
 
 
@@ -170,9 +205,11 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         display_name=userinfo.get("name"),
     )
     access_token = issue_token_for_user(user)
+    refresh_token = create_refresh_token(db, user.id)
     space_url = f"{settings.frontend_url.rstrip('/')}/space"
     response = RedirectResponse(url=space_url)
     set_auth_cookie(response, access_token)
+    set_refresh_cookie(response, refresh_token)
     return response
 
 
@@ -211,4 +248,4 @@ def google_onetap(payload: GoogleOneTapRequest, db: Session = Depends(get_db)) -
         email=token_payload["email"],
         display_name=token_payload.get("name"),
     )
-    return _token_response_with_cookie(user, status.HTTP_200_OK)
+    return _token_response_with_cookie(user, db, status.HTTP_200_OK)

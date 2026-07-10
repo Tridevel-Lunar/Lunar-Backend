@@ -12,11 +12,22 @@ All auth routes are under `/auth`. Protected routes accept either:
 Authorization: Bearer <access_token>
 ```
 
-or an httpOnly session cookie (`lunar_token`) set by login/register responses.
+or an httpOnly access cookie (`lunar_token`) set by login/register/refresh responses.
+
+### Session model
+
+| Cookie | Type | TTL (default) | Purpose |
+|--------|------|---------------|---------|
+| `lunar_token` | JWT access token | 30 min (`ACCESS_TOKEN_EXPIRE_MINUTES`) | Authenticate API requests |
+| `lunar_refresh` | Opaque token (hash stored in DB) | 7 days (`REFRESH_TOKEN_EXPIRE_DAYS`) | Exchange for new access token via `/auth/refresh` |
+
+Login, register, Google sign-in, and refresh all set **both** cookies (httpOnly, `SameSite=Lax`). Logout revokes the refresh token in PostgreSQL and clears both cookies.
+
+The JSON body returns `access_token` for Swagger/API clients; the browser SPA relies on cookies only.
 
 ### POST `/auth/register`
 
-Create account with email and password. Sets session cookie on success.
+Create account with email and password. Sets session cookies on success.
 
 **Request**
 
@@ -37,7 +48,7 @@ Create account with email and password. Sets session cookie on success.
 }
 ```
 
-Also returns `Set-Cookie: lunar_token=...` (httpOnly).
+Also returns `Set-Cookie: lunar_token=...` and `Set-Cookie: lunar_refresh=...` (httpOnly).
 
 **Errors:** `409` email already registered · `422` validation
 
@@ -45,7 +56,7 @@ Also returns `Set-Cookie: lunar_token=...` (httpOnly).
 
 ### POST `/auth/login`
 
-Sets session cookie on success.
+Sets session cookies on success.
 
 **Request**
 
@@ -66,6 +77,27 @@ Sets session cookie on success.
 ```
 
 **Errors:** `401` invalid credentials
+
+---
+
+### POST `/auth/refresh`
+
+Exchange a valid refresh cookie for a new access token. **Rotates** the refresh token on success (old token is revoked).
+
+Requires httpOnly cookie `lunar_refresh` — no request body.
+
+**Response `200`**
+
+```json
+{
+  "access_token": "<jwt>",
+  "token_type": "bearer"
+}
+```
+
+Also returns updated `Set-Cookie` for `lunar_token` and `lunar_refresh`.
+
+**Errors:** `401` refresh token missing, invalid, or expired
 
 ---
 
@@ -90,7 +122,7 @@ Returns current user. Use Swagger **Authorize** with `Bearer <token>`, or call f
 
 ### POST `/auth/logout`
 
-Clears the session cookie.
+Revokes the refresh token (if present) and clears session cookies.
 
 **Response `200`**
 
@@ -106,7 +138,7 @@ Browser redirect to Google OAuth. Requires `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT
 
 ### GET `/auth/google/callback`
 
-Google redirect target. Upserts user, sets session cookie, and redirects to:
+Google redirect target. Upserts user, sets session cookies, and redirects to:
 
 `{FRONTEND_URL}/space`
 
@@ -114,7 +146,7 @@ Google redirect target. Upserts user, sets session cookie, and redirects to:
 
 ### POST `/auth/google/onetap`
 
-Google One Tap / Sign in with Google button. Verifies a GIS credential JWT, upserts the user, and sets the session cookie. Requires `GOOGLE_CLIENT_ID` in backend env (client secret not used).
+Google One Tap / Sign in with Google button. Verifies a GIS credential JWT, upserts the user, and sets session cookies. Requires `GOOGLE_CLIENT_ID` in backend env (client secret not used).
 
 **Request**
 
@@ -133,7 +165,7 @@ Google One Tap / Sign in with Google button. Verifies a GIS credential JWT, upse
 }
 ```
 
-Also returns `Set-Cookie: lunar_token=...` (httpOnly).
+Also returns `Set-Cookie: lunar_token=...` and `Set-Cookie: lunar_refresh=...` (httpOnly).
 
 **Errors:** `401` invalid credential · `503` Google sign-in not configured
 

@@ -10,7 +10,7 @@ Python **FastAPI** — API server เชื่อม frontend กับ auth, �
 
 | หน้าที่ | รายละเอียด | สถานะ |
 |---------|------------|--------|
-| **Authentication** | register, login, logout, JWT + httpOnly cookie, Google Sign-In | ✓ |
+| **Authentication** | register, login, logout, refresh, JWT + httpOnly cookies, Google Sign-In | ✓ |
 | **API Gateway** | รับ request จาก frontend — รันบล็อกโค้ด, ส่งผล simulation กลับ | planned |
 | **Orbital / Physics** | คำนวณสมการฟิสิกส์อวกาศ, วงโคจร, power budget | planned |
 | **Logging** | โครงสร้างข้อมูล log จากการจำลอง | planned |
@@ -50,11 +50,21 @@ Python **FastAPI** — API server เชื่อม frontend กับ auth, �
 
 ## Authentication
 
+### Session cookies
+
+| Cookie | ชนิด | อายุ (default) | บทบาท |
+|--------|------|----------------|--------|
+| `lunar_token` | JWT access token | 30 นาที | ยืนยันตัวตน API request |
+| `lunar_refresh` | Opaque token (hash ใน DB) | 7 วัน | แลก access token ใหม่ผ่าน `/auth/refresh` |
+
+Refresh token เก็บในตาราง `refresh_tokens` — rotate ทุกครั้งที่ refresh สำเร็จ; logout revoke token ใน DB
+
 ### Email / password
 
-- `POST /auth/register` — สร้าง user, คืน JWT + Set-Cookie
+- `POST /auth/register` — สร้าง user, คืน JWT + Set-Cookie (access + refresh)
 - `POST /auth/login` — ตรวจ email/password, Set-Cookie
-- `POST /auth/logout` — ลบ cookie
+- `POST /auth/refresh` — แลก refresh cookie เป็น access ใหม่ + rotate refresh
+- `POST /auth/logout` — revoke refresh token, ลบ cookies ทั้งคู่
 - `GET /auth/me` — ต้องมี Bearer token หรือ cookie `lunar_token`
 
 ### Google Sign-In
@@ -72,7 +82,7 @@ One Tap flow:
 Frontend credential JWT
   → verify_google_id_token()  (google-auth, audience = GOOGLE_CLIENT_ID)
   → get_or_create_google_user()  (link by google_sub or email)
-  → Set-Cookie lunar_token
+  → Set-Cookie lunar_token + lunar_refresh
 ```
 
 Redirect callback ตรวจ `email_verified` เช่นเดียวกับ One Tap
@@ -103,16 +113,16 @@ Backend/
 │   ├── api/
 │   │   ├── deps.py             # get_current_user, admin guard
 │   │   └── routes/
-│   │       ├── auth.py         # register, login, logout, me, google/*
+│   │       ├── auth.py         # register, login, logout, refresh, me, google/*
 │   │       ├── laika.py        # assist, stream, context usage
 │   │       ├── studio.py       # collections, conversation, branch map
 │   │       └── backoffice.py   # knowledge admin
 │   ├── core/config.py, cookies.py, security.py
 │   ├── db/session.py, base.py
-│   ├── models/user.py, knowledge_*.py, studio_collection.py
+│   ├── models/user.py, refresh_token.py, knowledge_*.py, studio_collection.py
 │   ├── schemas/auth.py, laika.py, studio.py, backoffice.py
 │   ├── services/
-│   │   ├── auth.py, google_auth.py, rbac.py, user_admin.py
+│   │   ├── auth.py, google_auth.py, refresh_token.py, rbac.py, user_admin.py
 │   │   ├── laika.py, studio.py, studio_tree.py, knowledge/
 │   │   └── rag/                # providers, retriever, chain, context_window
 │   └── main.py
@@ -138,6 +148,8 @@ Backend/
 |----------|---------------|----------|
 | `DATABASE_URL` | `postgresql+psycopg://lunar:lunar@localhost:5432/lunar` | ต้องมี Postgres รัน — auth ล้มเหลวถ้า DB down |
 | `SECRET_KEY` | — | เปลี่ยนใน production |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | อายุ JWT access token |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | `7` | อายุ refresh token |
 | `CORS_ORIGINS` | `http://localhost:3000` | คั่นหลาย origin ด้วย comma |
 | `FRONTEND_URL` | `http://localhost:3000` | redirect หลัง Google OAuth callback |
 | `GOOGLE_CLIENT_ID` | _(ว่าง)_ | เปิด Google Sign-In |
@@ -194,7 +206,7 @@ Backend ใช้ **pytest** + FastAPI `TestClient` — unit/API tests ใช้
 | `tests/conftest.py` | SQLite DB, `client`, `auth_headers`, `google_client_id`, `google_token_payload` |
 | `tests/test_health.py` | `GET /health` |
 | `tests/test_security.py` | password hash/verify, JWT create/decode |
-| `tests/test_auth.py` | register, login, cookies, `/auth/me`, logout, Google One Tap (mocked), 401/409/503 |
+| `tests/test_auth.py` | register, login, cookies, refresh rotation, `/auth/me`, logout, Google One Tap (mocked), 401/409/503 |
 | `tests/test_laika.py` | `/laika/health`, `/laika/assist`, sources[], 503 when disabled |
 | `tests/test_laika_context.py` | Context usage, history timestamps, learner name in prompt |
 | `tests/test_studio.py` | Studio collections + conversation/branch APIs |
@@ -226,7 +238,8 @@ Backend ใช้ **pytest** + FastAPI `TestClient` — unit/API tests ใช้
 ## Frontend ↔ Backend
 
 - ไม่ import ข้าม repo — HTTP เท่านั้น
-- Session: httpOnly cookie `lunar_token` (`credentials: "include"` บน frontend)
+- Session: httpOnly cookies `lunar_token` + `lunar_refresh` (`credentials: "include"` บน frontend)
+- Access token หมดอายุ → frontend เรียก `POST /auth/refresh` อัตโนมัติ (ดู `frontend/src/lib/auth.ts`, `api.ts`)
 - ฟิสิกส์/วงโคจรรันฝั่ง backend; frontend แสดงผล
 - Blockly block definitions อาจ share เป็น JSON schema ผ่าน API ไม่ใช่ shared package
 
@@ -246,6 +259,8 @@ Repo นี้มี `Dockerfile` สำหรับ **Render Web Service (Docke
 |----------|----------|
 | `DATABASE_URL` | `postgresql+psycopg://...` จาก Render PostgreSQL |
 | `SECRET_KEY` | random string — ห้ามใช้ค่า dev |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | e.g. `30` |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | e.g. `7` |
 | `CORS_ORIGINS` | `https://your-frontend.vercel.app` |
 | `FRONTEND_URL` | URL frontend จริง |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth |

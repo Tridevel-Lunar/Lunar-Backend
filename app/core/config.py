@@ -14,12 +14,14 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://lunar:lunar@localhost:5432/lunar"
     secret_key: str = "change-me-in-production"
     access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 7
     algorithm: str = "HS256"
 
     cors_origins: str = "http://localhost:3000"
     frontend_url: str = "http://localhost:3000"
 
     auth_cookie_name: str = "lunar_token"
+    refresh_cookie_name: str = "lunar_refresh"
     auth_cookie_secure: bool = False
 
     google_client_id: str = ""

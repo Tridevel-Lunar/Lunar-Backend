@@ -126,6 +126,8 @@ def test_login_sets_auth_cookie(client):
     assert response.status_code == 200
     assert "lunar_token" in response.cookies
     assert response.cookies["lunar_token"]
+    assert "lunar_refresh" in response.cookies
+    assert response.cookies["lunar_refresh"]
 
 
 def test_register_sets_auth_cookie(client):
@@ -136,6 +138,7 @@ def test_register_sets_auth_cookie(client):
 
     assert response.status_code == 201
     assert "lunar_token" in response.cookies
+    assert "lunar_refresh" in response.cookies
 
 
 def test_me_works_with_cookie(client):
@@ -156,10 +159,67 @@ def test_logout_clears_cookie(client):
         json={"email": "logout@lunar.dev", "password": "testpass123"},
     )
     client.cookies.set("lunar_token", login.cookies["lunar_token"])
+    client.cookies.set("lunar_refresh", login.cookies["lunar_refresh"])
     response = client.post("/auth/logout")
 
     assert response.status_code == 200
     assert response.cookies.get("lunar_token") in ("", None) or "lunar_token" not in response.cookies
+    assert response.cookies.get("lunar_refresh") in ("", None) or "lunar_refresh" not in response.cookies
+
+
+def test_refresh_returns_new_access_token(client):
+    login = client.post(
+        "/auth/register",
+        json={"email": "refresh@lunar.dev", "password": "testpass123"},
+    )
+    client.cookies.set("lunar_refresh", login.cookies["lunar_refresh"])
+
+    response = client.post("/auth/refresh")
+
+    assert response.status_code == 200
+    assert response.json()["access_token"]
+    assert response.cookies["lunar_token"]
+    assert response.cookies["lunar_refresh"]
+    assert response.cookies["lunar_refresh"] != login.cookies["lunar_refresh"]
+
+
+def test_refresh_rotated_token_works_for_me(client):
+    login = client.post(
+        "/auth/register",
+        json={"email": "refreshme@lunar.dev", "password": "testpass123"},
+    )
+    client.cookies.set("lunar_refresh", login.cookies["lunar_refresh"])
+
+    refreshed = client.post("/auth/refresh")
+    assert refreshed.status_code == 200
+
+    client.cookies.set("lunar_token", refreshed.cookies["lunar_token"])
+    me = client.get("/auth/me")
+    assert me.status_code == 200
+    assert me.json()["email"] == "refreshme@lunar.dev"
+
+
+def test_refresh_rejects_old_token_after_rotation(client):
+    login = client.post(
+        "/auth/register",
+        json={"email": "oldrefresh@lunar.dev", "password": "testpass123"},
+    )
+    old_refresh = login.cookies["lunar_refresh"]
+    client.cookies.set("lunar_refresh", old_refresh)
+
+    first = client.post("/auth/refresh")
+    assert first.status_code == 200
+
+    client.cookies.set("lunar_refresh", old_refresh)
+    second = client.post("/auth/refresh")
+    assert second.status_code == 401
+
+
+def test_refresh_missing_cookie_returns_401(client):
+    response = client.post("/auth/refresh")
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Refresh token missing"
 
 
 def test_google_onetap_invalid_credential_returns_401(client, google_client_id, monkeypatch):
@@ -187,6 +247,7 @@ def test_google_onetap_success_creates_user(client, google_client_id, google_tok
     assert response.status_code == 200
     assert response.json()["access_token"]
     assert response.cookies["lunar_token"]
+    assert response.cookies["lunar_refresh"]
 
     client.cookies.set("lunar_token", response.cookies["lunar_token"])
     me = client.get("/auth/me")
