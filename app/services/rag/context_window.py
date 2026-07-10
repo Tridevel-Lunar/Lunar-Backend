@@ -144,6 +144,7 @@ def compute_context_usage(
     messages: list[ChatMessage] | None = None,
     learning_context: dict[str, object] | None = None,
     web_search: bool = False,
+    mode: str = "standard",
 ) -> ContextUsage:
     context_window = resolve_context_window(settings)
     reserved_output = settings.laika_reserved_output_tokens
@@ -177,6 +178,10 @@ def compute_context_usage(
     if web_search:
         segments.append(
             ContextSegment("web", "ค้นหาจากอินเทอร์เน็ต", WEB_SEARCH_TOKEN_ESTIMATE)
+        )
+    if mode == "extra":
+        segments.append(
+            ContextSegment("tool_loop", "Agentic tool loop", WEB_SEARCH_TOKEN_ESTIMATE * 2)
         )
     segments.append(ContextSegment("history", "ประวัติแชท", history_tokens))
     if pending:

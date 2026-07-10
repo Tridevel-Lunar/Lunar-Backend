@@ -17,6 +17,7 @@ def build_ollama_llm(settings: Settings) -> BaseChatModel:
         "timeout": max(settings.laika_timeout_seconds, 300),
         "streaming": True,
         "num_predict": -1,
+        "keep_alive": settings.ollama_keep_alive,
     }
     if num_ctx is not None:
         kwargs["num_ctx"] = num_ctx

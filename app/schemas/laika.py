@@ -2,6 +2,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
+LaikaMode = Literal["standard", "extra"]
+
 EntryType = Literal["note", "idea"]
 LaikaIntent = Literal[
     "summarize",
@@ -48,6 +50,7 @@ class AssistRequest(BaseModel):
     client_now: str | None = None
     learner_display_name: str | None = None
     web_search: bool = False
+    mode: LaikaMode = "standard"
 
     @field_validator("messages", mode="before")
     @classmethod
@@ -112,6 +115,7 @@ class ContextUsageRequest(BaseModel):
     messages: list[ChatMessage] = Field(default_factory=list)
     learning_context: LearningContext | None = None
     web_search: bool = False
+    mode: LaikaMode = "standard"
 
 
 class ContextUsageResponse(BaseModel):

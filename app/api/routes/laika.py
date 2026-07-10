@@ -98,6 +98,7 @@ def laika_context_usage(
             payload.learning_context.model_dump() if payload.learning_context else None
         ),
         web_search=payload.web_search,
+        mode=payload.mode,
     )
     return ContextUsageResponse(
         context_window=usage.context_window,

@@ -50,6 +50,8 @@ class Settings(BaseSettings):
     ollama_embed_model: str = "nomic-embed-text"
     # Ollama num_ctx passed to the model (0 = use Ollama default; safer for limited VRAM).
     ollama_num_ctx: int = 0
+    # How long to keep the Ollama model loaded in memory (e.g. "5m", "30m", "1h", "-1" for forever).
+    ollama_keep_alive: str = "5m"
 
     # Comma-separated emails auto-promoted to admin on register/login (bootstrap)
     admin_emails: str = ""
