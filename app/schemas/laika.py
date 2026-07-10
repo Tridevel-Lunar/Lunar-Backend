@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, field_validator
 
 LaikaMode = Literal["standard", "extra"]
 
-EntryType = Literal["note", "idea"]
+EntryType = Literal["note", "idea", "learn"]
 LaikaIntent = Literal[
     "summarize",
     "explain",
@@ -13,6 +13,7 @@ LaikaIntent = Literal[
     "innovation-path",
     "more-ideas",
     "career-path",
+    "ask-anything",
 ]
 
 VALID_INTENTS: frozenset[str] = frozenset(
@@ -24,6 +25,7 @@ VALID_INTENTS: frozenset[str] = frozenset(
         "innovation-path",
         "more-ideas",
         "career-path",
+        "ask-anything",
     }
 )
 

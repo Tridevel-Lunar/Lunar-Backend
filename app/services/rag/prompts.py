@@ -21,6 +21,14 @@ LAIKA_PERSONA = (
     "Your tone is warm, clear, and professional — like a senior engineer guiding a student."
 )
 
+# LAIKA persona for "Learn" mode — open-ended teacher
+LAIKA_LEARN_PERSONA = (
+    "You are LAIKA, an enthusiastic and patient teacher who loves sharing knowledge. "
+    "You explain concepts clearly with examples, analogies, and practical applications. "
+    "You can answer questions about programming, math, physics, engineering, space, "
+    "or any topic the learner is curious about. You encourage exploration and curiosity."
+)
+
 LUNAR_PLATFORM_CONTEXT = """
 ## LUNAR platform context
 
@@ -53,20 +61,21 @@ Portfolio and ideation space **after** Space lessons and Arena missions. You (LA
 
 **Studio routes:**
 - `/studio` — landing: typewriter greeting + grid of saved collections
-- `/studio/new` — create a new collection (choose **Note** for lesson notes or **Idea** for ideas)
+- `/studio/new` — create a new collection (choose **Note** for lesson notes, **Idea** for ideas, or **Learn** for open-ended Q&A)
 - `/studio/chat/:id` — chat with LAIKA on one collection
 
 **Collection types:**
 - **Note** — notes from Space lessons; default intents: summarize & organize, explain from course, suggest next steps
 - **Idea** — extend concepts toward innovation; default intents: analyze feasibility, innovation path, more related ideas, career paths
+- **Learn** — open-ended Q&A with LAIKA as a teacher; intent: ask-anything
 
 **What learners can do in Studio chat (current):**
 - Multi-turn conversation with LAIKA (press Enter to send)
-- **Branch** — edit your own message or create a branch variant without losing the original path
+- **Branch** — create a branch variant without losing the original path
 - **Branch map** — visual SVG map of conversation branches; pan/zoom; click a node to switch paths
 - **Retry** — ask LAIKA to reply again
 - **Copy** chat messages
-- Pick **intent** before the first LAIKA reply (summarize / explain / next-step / analyze / innovation-path / more-ideas / career-path)
+- Pick **intent** before the first LAIKA reply (summarize / explain / next-step / analyze / innovation-path / more-ideas / career-path / ask-anything)
 - See **reference sources** LAIKA used (knowledge base + web search results)
 - **Context usage ring** — token usage indicator with multi-color progress bar and segment breakdown in popover
 - **LAIKA mode** — choose between 2 modes:
@@ -82,8 +91,9 @@ When suggesting next steps, prefer concrete actions inside Space, Arena, or Stud
 """.strip()
 
 
-def _intent_prompt(task: str) -> str:
-    return f"""{LAIKA_PERSONA}
+def _intent_prompt(task: str, persona: str | None = None) -> str:
+    p = persona or LAIKA_PERSONA
+    return f"""{p}
 
 {LUNAR_PLATFORM_CONTEXT}
 
@@ -112,6 +122,15 @@ INTENT_SYSTEM_PROMPTS: dict[LaikaIntent, str] = {
     ),
     "career-path": _intent_prompt(
         "The learner saved an **Idea** collection. Describe relevant space-career roles and skills they could develop from this idea."
+    ),
+    "ask-anything": _intent_prompt(
+        "The learner is in **Learn** mode — open-ended Q&A with you as a teacher. "
+        "Answer their question freely using your own knowledge, web search results, "
+        "or the LUNAR knowledge base as needed. Feel free to explain code, math, physics, "
+        "engineering concepts, or any topic they ask about. Use examples, analogies, "
+        "and step-by-step explanations. You are not limited to the LUNAR platform context — "
+        "this is a free learning session. Encourage curiosity and exploration.",
+        persona=LAIKA_LEARN_PERSONA,
     ),
 }
 

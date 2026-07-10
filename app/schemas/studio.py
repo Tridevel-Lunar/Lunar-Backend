@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-EntryType = Literal["note", "idea"]
+EntryType = Literal["note", "idea", "learn"]
 
 
 class CreateCollectionRequest(BaseModel):
