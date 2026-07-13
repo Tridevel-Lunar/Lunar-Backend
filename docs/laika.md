@@ -318,7 +318,8 @@ Both always return `sources: []` in the final payload (may be empty). Entries ar
 
 ## Security
 
-- API keys only in `backend/.env` / host env — never frontend
+- API keys only in workspace `.env` / `backend/.env` / host env — never frontend
+- `GOOGLE_CLIENT_ID` is shared with frontend (public); keep `GOOGLE_CLIENT_SECRET` on backend only
 - Do not log user note/idea content
 - Do not expose Ollama port `11434` publicly in production
 

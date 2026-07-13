@@ -1,6 +1,6 @@
 # LUNAR API
 
-Interactive docs: **Swagger UI** at [`http://localhost:8000/docs`](http://localhost:8000/docs) · ReDoc at `/redoc`
+Interactive docs: **Swagger UI** at [`http://localhost:3000/api/docs`](http://localhost:3000/api/docs) (Docker / Vite proxy) · local uvicorn: [`http://localhost:8000/docs`](http://localhost:8000/docs) · ReDoc at `/redoc`
 
 Automated tests: `pytest` in `backend/` — see [development.md](development.md#testing)
 

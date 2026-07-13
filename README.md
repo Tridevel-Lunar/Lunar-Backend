@@ -2,15 +2,35 @@
 
 Python **FastAPI** — API gateway, authentication, ฟิสิกส์อวกาศ, simulation, LAIKA (LLM + RAG)
 
+> Repo นี้เป็น **git submodule** ใน workspace [lunar-dev](https://github.com/Tridevel-Lunar/lunar-dev) — แนะนำรันทั้ง stack จาก workspace root
+
 ## Docs
 
 - [docs/development.md](docs/development.md) — tech stack, conventions, env, testing
 - [docs/api.md](docs/api.md) — auth API contract summary
-- [../Frontend/docs/development.md](../Frontend/docs/development.md) — frontend dev + Vite proxy
+- [docs/laika.md](docs/laika.md) — LAIKA / RAG
+- [../frontend/docs/development.md](../frontend/docs/development.md) — frontend + Vite proxy
+- Workspace Docker: [../../docs/docker-dev.md](../../docs/docker-dev.md)
 
 ## Quick Start
 
-### Local (recommended for dev)
+### Docker (recommended)
+
+จาก workspace root (`lunar-dev`):
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+- App + API proxy: http://localhost:3000 (`/api` → backend)
+- Swagger: http://localhost:3000/api/docs
+- Backend **ไม่** expose port ออก host
+- PostgreSQL: `localhost:5432` (user/db: `lunar`)
+
+รายละเอียด: [../../docs/docker-dev.md](../../docs/docker-dev.md)
+
+### Local (uvicorn — optional)
 
 ```bash
 python -m venv .lunar-be-venv
@@ -18,23 +38,15 @@ python -m venv .lunar-be-venv
 pip install -r requirements.txt
 ```
 
-สร้าง `.env` จากค่าใน [docs/development.md](docs/development.md#environment) — ต้องมี **PostgreSQL** รันที่ `localhost:5432`
+สร้าง `backend/.env` จากค่าใน [docs/development.md](docs/development.md#environment) — ต้องมี **PostgreSQL** ที่ `localhost:5432` (หรือรันแค่ `postgres` จาก compose)
 
 ```bash
 alembic upgrade head
 uvicorn app.main:app --reload --port 8000
 ```
 
-API: http://localhost:8000 · Health: http://localhost:8000/health · Swagger: http://localhost:8000/docs
-
-Frontend (`npm run dev` ที่ port 3000) proxy `/api` → backend อัตโนมัติ
-
-### Docker (optional)
-
-```bash
-# จาก workspace root — เมื่อมี docker-compose.yml
-docker compose up --build backend
-```
+API: http://localhost:8000 · Health: `/health` · Swagger: `/docs`  
+Frontend ที่ port 3000 proxy `/api` → backend อัตโนมัติ
 
 ## Tests
 
@@ -55,7 +67,7 @@ pytest tests/test_auth.py
 | Google Sign-In | ✓ One Tap (`POST /auth/google/onetap`) + redirect OAuth (`GET /auth/google`) |
 | Users DB | ✓ PostgreSQL + Alembic migrations |
 | Health | ✓ `GET /health` |
-| Orbital / LAIKA / simulation | planned |
+| LAIKA / Studio | ✓ (ดู [docs/laika.md](docs/laika.md)) |
 
 ## Stack (สรุป)
 
@@ -63,10 +75,8 @@ pytest tests/test_auth.py
 |------|-----------|
 | Language | Python 3.11+ |
 | API | FastAPI, Uvicorn |
-| Database | PostgreSQL, SQLAlchemy, Alembic |
+| Database | PostgreSQL + pgvector, SQLAlchemy, Alembic |
 | Auth | passlib/bcrypt, python-jose, Authlib, google-auth |
-| Orbital mechanics | Poliastro / PyEphem (planned) |
-| LAIKA LLM | Gemini API (planned) |
-| RAG | LangChain หรือ LlamaIndex (planned) |
+| LAIKA | LangChain RAG + Gemini / Groq / Ollama |
 
 Production deploy (Render Docker): [`Dockerfile`](Dockerfile) — ดู [docs/development.md](docs/development.md#deploy-render--docker)

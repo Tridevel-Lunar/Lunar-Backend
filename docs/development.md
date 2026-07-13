@@ -2,9 +2,10 @@
 
 Python **FastAPI** — API server เชื่อม frontend กับ auth, ฟิสิกส์, simulation, และ LAIKA
 
-**Product context:** [../Frontend/docs/concept.md](../Frontend/docs/concept.md) · [functional-spec](../Frontend/docs/functional-spec.md)  
+**Product context:** [../frontend/docs/concept.md](../frontend/docs/concept.md) · [functional-spec](../frontend/docs/functional-spec.md)  
 **API contract:** [api.md](api.md)  
-**Frontend dev:** [../Frontend/docs/development.md](../Frontend/docs/development.md)
+**Frontend dev:** [../frontend/docs/development.md](../frontend/docs/development.md)  
+**Workspace Docker:** [../../docs/docker-dev.md](../../docs/docker-dev.md)
 
 ## บทบาทหลัก
 
@@ -101,13 +102,13 @@ Redirect callback ตรวจ `email_verified` เช่นเดียวก�
 
 - RAG ลด hallucination — ตอบจากเอกสารวิศวกรรมอวกาศจริง
 - Assist prompt รวมชื่อผู้เรียน (จาก auth), เวลาปัจจุบัน, timestamp ประวัติแชท, และคำแนะนำความต่อเนื่องของบทสนทนา
-- API keys อยู่ใน `.env` เท่านั้น — ห้าม commit
+- API keys อยู่ใน workspace `.env` / `backend/.env` เท่านั้น — ห้าม commit
 - รายละเอียดเต็ม: **[docs/laika.md](laika.md)** (providers, ingest, env)
 
 ## โครงสร้างปัจจุบัน
 
 ```
-Backend/
+backend/
 ├── alembic/                    # migrations
 ├── app/
 │   ├── api/
@@ -142,34 +143,40 @@ Backend/
 
 ## Environment
 
-สร้าง `Backend/.env` (ห้าม commit):
+**Docker (recommended):** ตั้งค่าใน workspace root `.env` — compose inject เข้า backend container  
+แม่แบบ: [../../.env.example](../../.env.example) · ดู [../../docs/docker-dev.md](../../docs/docker-dev.md)
+
+**Local uvicorn:** สร้าง `backend/.env` (ห้าม commit) ด้วยตัวแปรชุดเดียวกัน
 
 | Variable | Default (dev) | หมายเหตุ |
 |----------|---------------|----------|
-| `DATABASE_URL` | `postgresql+psycopg://lunar:lunar@localhost:5432/lunar` | ต้องมี Postgres รัน — auth ล้มเหลวถ้า DB down |
+| `DATABASE_URL` | `postgresql+psycopg://lunar:lunar@localhost:5432/lunar` | ใน Docker compose ตั้งเป็น host `postgres` |
 | `SECRET_KEY` | — | เปลี่ยนใน production |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | อายุ JWT access token |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | `7` | อายุ refresh token |
 | `CORS_ORIGINS` | `http://localhost:3000` | คั่นหลาย origin ด้วย comma |
 | `FRONTEND_URL` | `http://localhost:3000` | redirect หลัง Google OAuth callback |
-| `GOOGLE_CLIENT_ID` | _(ว่าง)_ | เปิด Google Sign-In |
-| `GOOGLE_CLIENT_SECRET` | _(ว่าง)_ | สำหรับ redirect OAuth เท่านั้น |
-| `GOOGLE_REDIRECT_URI` | `http://localhost:8000/auth/google/callback` | ต้องตรงกับ Google Cloud Console |
+| `GOOGLE_CLIENT_ID` | _(ว่าง)_ | เปิด Google Sign-In — **ค่าเดียวกับ frontend** (public client ID) |
+| `GOOGLE_CLIENT_SECRET` | _(ว่าง)_ | redirect OAuth เท่านั้น — ห้ามส่งไป frontend |
+| `GOOGLE_REDIRECT_URI` | `http://localhost:3000/api/auth/google/callback` | ผ่าน Vite proxy (ต้องตรงกับ Google Cloud Console) |
 | `AUTH_COOKIE_SECURE` | `false` | ตั้ง `true` ใน production (HTTPS) |
-
-`GOOGLE_CLIENT_ID` ต้องตรงกับ `VITE_GOOGLE_CLIENT_ID` บน frontend
 
 ### Google Cloud Console (dev)
 
 1. OAuth client type: **Web application**
 2. **Authorized JavaScript origins:** `http://localhost:3000`, `http://127.0.0.1:3000`
-3. **Authorized redirect URIs:** `http://localhost:8000/auth/google/callback` (ถ้าใช้ redirect flow)
+3. **Authorized redirect URIs:** `http://localhost:3000/api/auth/google/callback` (ถ้าใช้ redirect flow)
 4. OAuth consent screen: **External** + test users (ถ้าอยู่ใน Testing mode)
 
 ## Commands
 
 ```bash
-# Local
+# Docker — จาก workspace root
+docker compose up --build
+docker compose exec backend alembic upgrade head
+docker compose exec backend pytest
+
+# Local uvicorn
 python -m venv .lunar-be-venv
 .lunar-be-venv\Scripts\activate          # Windows
 pip install -r requirements.txt
@@ -180,19 +187,22 @@ uvicorn app.main:app --reload --port 8000
 pytest
 pytest -v
 pytest tests/test_auth.py
-
-# Docker (optional — workspace root)
-docker compose up --build backend
-docker compose exec backend pytest
 ```
 
-**Default API URL:** `http://localhost:8000`  
+**API URL:**
+
+| โหมด | Base URL |
+|------|----------|
+| Docker | http://localhost:3000/api (Vite proxy) |
+| Local uvicorn | http://localhost:8000 |
+
 Frontend เรียกผ่าน `/api` — Vite proxy strip prefix (`/api/auth/login` → `/auth/login`)
 
 ## API
 
-- **Swagger UI:** http://localhost:8000/docs
-- **ReDoc:** http://localhost:8000/redoc
+- **Swagger (Docker):** http://localhost:3000/api/docs
+- **Swagger (local uvicorn):** http://localhost:8000/docs
+- **ReDoc:** `/redoc` (ภายใต้ base เดียวกัน)
 - Contract summary: [api.md](api.md)
 
 ## Testing
@@ -221,9 +231,9 @@ Backend ใช้ **pytest** + FastAPI `TestClient` — unit/API tests ใช้
 
 ### Manual / E2E
 
-1. รัน PostgreSQL + `alembic upgrade head` + uvicorn
-2. Swagger: http://localhost:8000/docs — register → `/auth/me`
-3. Frontend: http://localhost:3000/register → Google หรือ email → `/space`
+1. `docker compose up --build` จาก workspace root (หรือ Postgres + uvicorn แยก)
+2. Swagger: http://localhost:3000/api/docs — register → `/auth/me`
+3. App: http://localhost:3000/register → Google หรือ email → `/space`
 
 **ข้อผิดพลาดที่พบบ่อย:** Google login ผ่าน GIS แล้ว แต่ `POST /auth/google/onetap` 500 — มักเป็น **PostgreSQL ไม่รัน**
 
