@@ -53,6 +53,8 @@ class AssistRequest(BaseModel):
     learner_display_name: str | None = None
     web_search: bool = False
     mode: LaikaMode = "standard"
+    collection_id: str | None = None
+    assistant_node_id: str | None = None
 
     @field_validator("messages", mode="before")
     @classmethod

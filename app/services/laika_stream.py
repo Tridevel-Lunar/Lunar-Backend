@@ -9,7 +9,10 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
+from datetime import datetime, UTC
+
 from app.core.config import Settings
+from app.models.user import User
 from app.schemas.laika import AssistRequest, LaikaSource
 from app.services.laika import stream_laika_assist
 from app.services.laika_errors import laika_provider_error_message
@@ -76,13 +79,59 @@ def stream_event_to_sse(event_type: str, value: object) -> str:
     )
 
 
+def _save_streaming_buffer(
+    db: Session,
+    user: User,
+    request: AssistRequest,
+    buffer: list[str],
+) -> None:
+    """Save accumulated streaming text to the collection's tree in DB."""
+    from app.services import studio as studio_service
+
+    text = "".join(buffer).strip()
+    if not text or not request.collection_id or not request.assistant_node_id:
+        return
+
+    import uuid
+    try:
+        cid = uuid.UUID(request.collection_id)
+    except ValueError:
+        return
+
+    row = studio_service.get_collection(db, user, cid)
+    if not row:
+        return
+
+    tree = row.tree
+    nodes = tree.get("nodes", {})
+    if not isinstance(nodes, dict):
+        return
+
+    node = nodes.get(request.assistant_node_id)
+    if not isinstance(node, dict):
+        return
+    if node.get("role") != "assistant":
+        return
+
+    node["content"] = text
+    tree["nodes"] = nodes
+
+    row.tree = tree
+    row.updated_at = datetime.now(UTC)
+    db.commit()
+
+
 def iter_laika_assist_sse(
     db: Session,
     settings: Settings,
     request: AssistRequest,
+    user: User,
     cancel: threading.Event,
 ) -> Iterator[str]:
-    """Sync SSE iterator — yields directly from the LLM stream without a thread queue."""
+    """Sync SSE iterator — yields directly from the LLM stream without a thread queue.
+    Accumulates tokens and auto-saves to DB on done or cancel.
+    """
+    buffer: list[str] = []
     try:
         for event_type, value in stream_laika_assist(
             db,
@@ -91,10 +140,16 @@ def iter_laika_assist_sse(
             cancel_event=cancel,
         ):
             if cancel.is_set():
+                _save_streaming_buffer(db, user, request, buffer)
                 break
+            if event_type == "token":
+                buffer.append(str(value))
             yield stream_event_to_sse(event_type, value)
+        if not cancel.is_set():
+            _save_streaming_buffer(db, user, request, buffer)
     except GeneratorExit:
         cancel.set()
+        _save_streaming_buffer(db, user, request, buffer)
         raise
     except Exception as exc:
         if not cancel.is_set():

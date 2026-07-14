@@ -218,7 +218,7 @@ def laika_assist_stream(
     cancel = threading.Event()
 
     return StreamingResponse(
-        iter_laika_assist_sse(db, settings, request, cancel),
+        iter_laika_assist_sse(db, settings, request, user, cancel),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache, no-transform",
