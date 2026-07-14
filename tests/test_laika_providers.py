@@ -35,14 +35,14 @@ def test_get_llm_gemini_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
         get_llm(settings)
 
 
-def test_get_llm_groq_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("LAIKA_LLM_PROVIDER", "groq")
-    monkeypatch.setenv("GROQ_API_KEY", "")
+def test_get_llm_deepseek_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LAIKA_LLM_PROVIDER", "deepseek")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "")
     from app.core.config import get_settings
 
     get_settings.cache_clear()
     settings = get_settings()
-    with pytest.raises(ValueError, match="GROQ_API_KEY"):
+    with pytest.raises(ValueError, match="DEEPSEEK_API_KEY"):
         get_llm(settings)
 
 
@@ -58,7 +58,7 @@ def test_get_llm_ollama_builds(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_invalid_embedding_provider_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("LAIKA_EMBEDDING_PROVIDER", "groq")
+    monkeypatch.setenv("LAIKA_EMBEDDING_PROVIDER", "deepseek")
     from app.core.config import get_settings
 
     get_settings.cache_clear()

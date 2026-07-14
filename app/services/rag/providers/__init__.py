@@ -10,10 +10,10 @@ def get_llm(settings: Settings) -> BaseChatModel:
             from app.services.rag.providers.gemini import build_gemini_llm
 
             return build_gemini_llm(settings)
-        case "groq":
-            from app.services.rag.providers.groq import build_groq_llm
+        case "deepseek":
+            from app.services.rag.providers.deepseek import build_deepseek_llm
 
-            return build_groq_llm(settings)
+            return build_deepseek_llm(settings)
         case "ollama":
             from app.services.rag.providers.ollama import build_ollama_llm
 

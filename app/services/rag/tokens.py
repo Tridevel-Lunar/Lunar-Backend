@@ -12,6 +12,8 @@ MODEL_CONTEXT_WINDOWS: dict[str, int] = {
     "gemini-2.0-flash": 1_048_576,
     "gemini-2.5-flash": 1_048_576,
     "llama-3.3-70b": 131_072,
+    "deepseek-chat": 64_000,
+    "deepseek-reasoner": 64_000,
     "qwen2.5:7b": 32_768,
     "qwen2.5": 32_768,
     "gemma4:e4b": 131_072,
@@ -45,8 +47,8 @@ def estimate_tokens(text: str) -> int:
 def llm_model_label(settings: Settings) -> str:
     if settings.laika_llm_provider == "gemini":
         return settings.gemini_model
-    if settings.laika_llm_provider == "groq":
-        return settings.groq_model
+    if settings.laika_llm_provider == "deepseek":
+        return settings.deepseek_model
     return settings.ollama_llm_model
 
 
@@ -65,8 +67,8 @@ def resolve_context_window(settings: Settings) -> int:
             return MODEL_CONTEXT_WINDOWS[key]
     if settings.laika_llm_provider == "gemini":
         return 1_048_576
-    if settings.laika_llm_provider == "groq":
-        return 131_072
+    if settings.laika_llm_provider == "deepseek":
+        return 64_000
     return 8_192
 
 
