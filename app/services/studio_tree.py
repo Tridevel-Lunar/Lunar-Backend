@@ -174,9 +174,9 @@ def node_to_message(node: dict[str, Any]) -> dict[str, Any]:
         "role": node.get("role"),
         "content": node.get("content", ""),
         "created_at": node.get("createdAt", ""),
+        "updated_at": node.get("updatedAt", ""),
         "parent_id": node.get("parentId"),
         "laika_intent": node.get("laikaIntent"),
-        "laika_sources": node.get("laikaSources"),
     }
 
 
@@ -236,6 +236,7 @@ def build_branch_map_payload(tree: dict[str, Any]) -> dict[str, Any]:
                 "id": n["id"],
                 "label": _preview_label(str(n.get("content", ""))),
                 "created_at": n.get("createdAt", ""),
+                "updated_at": n.get("updatedAt", ""),
             }
             for n in user_nodes
         ],
@@ -243,3 +244,160 @@ def build_branch_map_payload(tree: dict[str, Any]) -> dict[str, Any]:
         "active_user_node_ids": active_ids,
         "active_edge_keys": sorted(active_edge_keys),
     }
+
+
+# ── Helpers for node manipulation ──────────────────────────────────────────
+
+def _new_id() -> str:
+    import uuid
+    return str(uuid.uuid4())
+
+
+def _now_iso() -> str:
+    from datetime import UTC, datetime
+    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
+
+
+def create_node(
+    role: Role,
+    content: str,
+    *,
+    parent_id: str | None = None,
+    laika_intent: str | None = None,
+    node_id: str | None = None,
+) -> dict[str, Any]:
+    now = _now_iso()
+    return {
+        "id": node_id or _new_id(),
+        "role": role,
+        "content": content,
+        "createdAt": now,
+        "updatedAt": now,
+        "parentId": parent_id,
+        "laikaIntent": laika_intent,
+    }
+
+
+def add_node(tree: dict[str, Any], node: dict[str, Any]) -> dict[str, Any]:
+    nodes = {**tree.get("nodes", {}), node["id"]: node}
+    root_ids = list(tree.get("rootIds", []))
+    if not node.get("parentId") and node.get("role") == "user" and node["id"] not in root_ids:
+        root_ids.append(node["id"])
+    selected = dict(tree.get("selectedChildByParent", {}))
+    parent_id = node.get("parentId")
+    if parent_id:
+        selected[parent_id] = node["id"]
+    elif node.get("role") == "user":
+        selected[ROOT_PARENT_KEY] = node["id"]
+    return {**tree, "nodes": nodes, "rootIds": root_ids, "selectedChildByParent": selected}
+
+
+def update_node(tree: dict[str, Any], node_id: str, patch: dict[str, Any]) -> dict[str, Any]:
+    existing = get_node(tree, node_id)
+    if not existing:
+        return tree
+    merged = {**existing, **patch, "updatedAt": _now_iso()}
+    nodes = {**tree.get("nodes", {}), node_id: merged}
+    return {**tree, "nodes": nodes}
+
+
+def select_sibling(tree: dict[str, Any], parent_id: str | None, sibling_id: str) -> dict[str, Any]:
+    siblings = get_children(tree, parent_id) if parent_id else get_user_siblings(tree, sibling_id)
+    if not any(s.get("id") == sibling_id for s in siblings):
+        return tree
+    key = parent_key(parent_id)
+    selected = {**tree.get("selectedChildByParent", {})}
+    selected[key] = sibling_id
+    result = {**tree, "selectedChildByParent": selected}
+    if not parent_id:
+        root_ids = list(tree.get("rootIds", []))
+        result["rootIds"] = [sibling_id] + [rid for rid in root_ids if rid != sibling_id]
+    return prune_invalid_selections(result)
+
+
+def find_assistant_child(tree: dict[str, Any], parent_id: str) -> dict[str, Any] | None:
+    return next(
+        (n for n in get_children(tree, parent_id) if n.get("role") == "assistant"),
+        None,
+    )
+
+
+def get_active_leaf(tree: dict[str, Any]) -> dict[str, Any] | None:
+    """Return the last node in the active path."""
+    path = build_active_path(tree)
+    return path[-1] if path else None
+
+
+def messages_from_tree(tree: dict[str, Any]) -> list[dict[str, Any]]:
+    """Build ChatMessage-like history from the active path (excluding leaf if it's empty user)."""
+    path = build_active_path(tree)
+    result = []
+    for node in path:
+        content = str(node.get("content", "")).strip()
+        if not content:
+            continue
+        result.append({
+            "role": node["role"],
+            "content": content,
+            "created_at": node.get("createdAt"),
+        })
+    return result
+
+
+def prepare_tree_for_stream(
+    tree: dict[str, Any],
+    mode: str,
+    content: str,
+    intent: str,
+    *,
+    node_id: str | None = None,
+    parent_node_id: str | None = None,
+) -> tuple[dict[str, Any], str, str]:
+    """
+    Modify tree according to mode, returning (new_tree, user_node_id, assistant_node_id).
+
+    Modes:
+    - new / follow_up: create user + assistant node pair
+    - edit: update existing user node + clear its assistant child
+    - retry: clear existing assistant node
+    - branch: create sibling user + assistant under same parent
+    """
+    if mode in ("new", "follow_up"):
+        user = create_node(role="user", content=content, parent_id=parent_node_id)
+        tree = add_node(tree, user)
+        assistant = create_node(role="assistant", content="", parent_id=user["id"], laika_intent=intent)
+        tree = add_node(tree, assistant)
+        return tree, user["id"], assistant["id"]
+
+    if mode == "edit":
+        if not node_id:
+            raise ValueError("edit mode requires node_id")
+        tree = update_node(tree, node_id, {"content": content})
+        existing = find_assistant_child(tree, node_id)
+        if existing:
+            tree = update_node(tree, existing["id"], {"content": ""})
+            return tree, node_id, existing["id"]
+        # no assistant child yet — create one
+        assistant = create_node(role="assistant", content="", parent_id=node_id, laika_intent=intent)
+        tree = add_node(tree, assistant)
+        return tree, node_id, assistant["id"]
+
+    if mode == "retry":
+        if not node_id:
+            raise ValueError("retry mode requires node_id")
+        tree = update_node(tree, node_id, {"content": ""})
+        parent = get_node(tree, tree.get("nodes", {}).get(node_id, {}).get("parentId", ""))
+        parent_id = parent["id"] if parent else ""
+        return tree, parent_id, node_id
+
+    if mode == "branch":
+        if not node_id or not parent_node_id:
+            raise ValueError("branch mode requires node_id and parent_node_id")
+        sibling = create_node(role="user", content=content, parent_id=parent_node_id)
+        tree = add_node(tree, sibling)
+        tree = select_sibling(tree, parent_node_id, sibling["id"])
+        assistant = create_node(role="assistant", content="", parent_id=sibling["id"], laika_intent=intent)
+        tree = add_node(tree, assistant)
+        return tree, sibling["id"], assistant["id"]
+
+    raise ValueError(f"Unknown mode: {mode}")

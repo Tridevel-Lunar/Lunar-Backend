@@ -1,53 +1,36 @@
-import asyncio
-import contextlib
 import threading
 
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, status
-from pydantic import ValidationError
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
-from app.api.deps import get_current_user, get_ws_user
+from app.api.deps import get_current_user
 from app.core.config import Settings, get_settings
 from app.db.session import get_db
 from app.models.user import User
-from app.models.user import User
 from app.schemas.laika import (
-    AssistRequest,
-    AssistResponse,
     ContextUsageRequest,
     ContextUsageResponse,
     ContextUsageSegment,
     LaikaHealthResponse,
+    StreamAssistRequest,
     StudioGreetingRequest,
     StudioGreetingResponse,
 )
-from app.services.laika import run_laika_assist
 from app.services.laika_errors import laika_provider_error_message
 from app.services.laika_stream import iter_laika_assist_sse
-from app.services.laika_ws import pump_laika_assist, watch_for_stop
 from app.services.rag.context_window import compute_context_usage
-from app.services.rag.learner import resolve_learner_display_name
 from app.services.rag.tokens import resolve_context_window
 from app.services.studio_greeting import run_studio_greeting
 
 router = APIRouter(prefix="/laika", tags=["laika"])
 
 
-def _assist_request_for_user(payload: AssistRequest, user: User) -> AssistRequest:
-    data = payload.model_dump()
-    data["learner_display_name"] = resolve_learner_display_name(
-        user.display_name,
-        user.email,
-    )
-    return AssistRequest.model_validate(data)
-
-
 def _llm_model_name(settings: Settings) -> str:
     if settings.laika_llm_provider == "gemini":
         return settings.gemini_model
-    if settings.laika_llm_provider == "groq":
-        return settings.groq_model
+    if settings.laika_llm_provider == "deepseek":
+        return settings.deepseek_model
     return settings.ollama_llm_model
 
 
@@ -156,46 +139,6 @@ def laika_studio_greeting(
 
 
 @router.post(
-    "/assist",
-    response_model=AssistResponse,
-    summary="LAIKA mentor assist",
-    responses={
-        503: {"description": "LAIKA disabled or provider misconfigured"},
-        504: {"description": "LLM timeout"},
-    },
-)
-def laika_assist(
-    payload: AssistRequest,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
-) -> AssistResponse:
-    if not settings.laika_enabled:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="LAIKA is disabled — configure active LLM and embedding providers",
-        )
-    request = _assist_request_for_user(payload, user)
-    try:
-        return run_laika_assist(db, settings, request)
-    except TimeoutError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail="LAIKA request timed out",
-        ) from exc
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=str(exc),
-        ) from exc
-    except Exception as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=laika_provider_error_message(exc),
-        ) from exc
-
-
-@router.post(
     "/assist/stream",
     summary="LAIKA mentor assist (SSE stream)",
     responses={
@@ -203,7 +146,7 @@ def laika_assist(
     },
 )
 def laika_assist_stream(
-    payload: AssistRequest,
+    payload: StreamAssistRequest,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
@@ -214,11 +157,10 @@ def laika_assist_stream(
             detail="LAIKA is disabled — configure active LLM and embedding providers",
         )
 
-    request = _assist_request_for_user(payload, user)
     cancel = threading.Event()
 
     return StreamingResponse(
-        iter_laika_assist_sse(db, settings, request, user, cancel),
+        iter_laika_assist_sse(db, settings, payload, user, cancel),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache, no-transform",
@@ -226,61 +168,3 @@ def laika_assist_stream(
             "X-Accel-Buffering": "no",
         },
     )
-
-
-@router.websocket("/assist/ws")
-async def laika_assist_ws(
-    websocket: WebSocket,
-    db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
-) -> None:
-    try:
-        user = get_ws_user(websocket, db)
-    except HTTPException:
-        await websocket.close(code=4401)
-        return
-
-    await websocket.accept()
-
-    try:
-        incoming = await websocket.receive_json()
-    except WebSocketDisconnect:
-        return
-
-    if incoming.get("type") != "assist":
-        await websocket.send_json({"type": "error", "detail": "Expected assist message"})
-        await websocket.close()
-        return
-
-    try:
-        payload = AssistRequest.model_validate(incoming.get("payload"))
-        request = _assist_request_for_user(payload, user)
-    except ValidationError as exc:
-        await websocket.send_json({"type": "error", "detail": str(exc)})
-        await websocket.close()
-        return
-
-    if not settings.laika_enabled:
-        await websocket.send_json(
-            {
-                "type": "error",
-                "detail": "LAIKA is disabled — configure active LLM and embedding providers",
-            }
-        )
-        await websocket.close()
-        return
-
-    cancel = threading.Event()
-    watch_task = asyncio.create_task(watch_for_stop(websocket, cancel))
-
-    try:
-        await pump_laika_assist(websocket, db, settings, request, cancel)
-    except WebSocketDisconnect:
-        cancel.set()
-    finally:
-        cancel.set()
-        watch_task.cancel()
-        with contextlib.suppress(asyncio.CancelledError):
-            await watch_task
-        with contextlib.suppress(Exception):
-            await websocket.close(code=1000, reason="assist_complete")

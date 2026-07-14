@@ -4,7 +4,7 @@ from typing import Literal
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-LaikaLlmProvider = Literal["gemini", "groq", "ollama"]
+LaikaLlmProvider = Literal["gemini", "ollama", "deepseek"]
 LaikaEmbeddingProvider = Literal["gemini", "ollama"]
 
 
@@ -42,9 +42,6 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-2.0-flash"
     gemini_embedding_model: str = "text-embedding-004"
 
-    groq_api_key: str = ""
-    groq_model: str = "llama-3.3-70b-versatile"
-
     ollama_base_url: str = "http://localhost:11434"
     ollama_llm_model: str = "qwen2.5:7b-instruct"
     ollama_embed_model: str = "nomic-embed-text"
@@ -52,6 +49,10 @@ class Settings(BaseSettings):
     ollama_num_ctx: int = 0
     # How long to keep the Ollama model loaded in memory (e.g. "5m", "30m", "1h", "-1" for forever).
     ollama_keep_alive: str = "5m"
+
+    # DeepSeek (OpenAI-compatible API)
+    deepseek_api_key: str = ""
+    deepseek_model: str = "deepseek-chat"
 
     # Comma-separated emails auto-promoted to admin on register/login (bootstrap)
     admin_emails: str = ""
@@ -91,10 +92,10 @@ class Settings(BaseSettings):
     def laika_llm_enabled(self) -> bool:
         if self.laika_llm_provider == "gemini":
             return bool(self.gemini_api_key)
-        if self.laika_llm_provider == "groq":
-            return bool(self.groq_api_key)
         if self.laika_llm_provider == "ollama":
             return bool(self.ollama_base_url)
+        if self.laika_llm_provider == "deepseek":
+            return bool(self.deepseek_api_key)
         return False
 
     @property
@@ -116,11 +117,11 @@ class Settings(BaseSettings):
         return f"ollama:{self.ollama_embed_model}"
 
     def validate_laika_providers(self) -> None:
-        if self.laika_llm_provider not in ("gemini", "groq", "ollama"):
+        if self.laika_llm_provider not in ("gemini", "ollama", "deepseek"):
             raise ValueError(f"Invalid LAIKA_LLM_PROVIDER: {self.laika_llm_provider}")
         if self.laika_embedding_provider not in ("gemini", "ollama"):
             raise ValueError(
-                "LAIKA_EMBEDDING_PROVIDER must be gemini or ollama (groq has no embeddings API)"
+                "LAIKA_EMBEDDING_PROVIDER must be gemini or ollama"
             )
 
 

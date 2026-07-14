@@ -15,7 +15,7 @@ Python **FastAPI** — API server เชื่อม frontend กับ auth, �
 | **API Gateway** | รับ request จาก frontend — รันบล็อกโค้ด, ส่งผล simulation กลับ | planned |
 | **Orbital / Physics** | คำนวณสมการฟิสิกส์อวกาศ, วงโคจร, power budget | planned |
 | **Logging** | โครงสร้างข้อมูล log จากการจำลอง | planned |
-| **LAIKA** | LLM (Gemini) + RAG ให้คำแนะนำผู้เรียน | planned |
+| **LAIKA** | LLM (Gemini/DeepSeek/Ollama) + RAG ให้คำแนะนำผู้เรียน | ✓ |
 | **Satellite imagery** | ส่งข้อมูลภาพดาวเทียมกลับ frontend | planned |
 
 ## Tech Stack
@@ -44,8 +44,8 @@ Python **FastAPI** — API server เชื่อม frontend กับ auth, �
 |-----------|--------|
 | **Poliastro** | orbital mechanics, Kepler |
 | **PyEphem** | ephemeris / ตำแหน่งดาราศาสตร์ |
-| **Gemini API** | LLM หลักของ LAIKA |
-| **LangChain** หรือ **LlamaIndex** | RAG |
+| **Gemini API** / **DeepSeek API** / **Ollama** | LLM providers สำหรับ LAIKA |
+| **LangChain** | RAG pipeline |
 
 > ไม่ใช้ Node.js/Express — backend เป็น Python + FastAPI เท่านั้น
 

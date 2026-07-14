@@ -29,18 +29,11 @@ def derive_title(content: str) -> str:
 
 
 def empty_tree(content: str, created_at: datetime) -> dict[str, Any]:
-    root_id = str(uuid.uuid4())
-    created_iso = created_at.astimezone(UTC).isoformat().replace("+00:00", "Z")
+    # tree ว่าง — ไม่มี root user node แล้ว
+    # content ไม่จำเป็น เก็บเฉพาะ metadata ของ collection
     return {
-        "nodes": {
-            root_id: {
-                "id": root_id,
-                "role": "user",
-                "content": content,
-                "createdAt": created_iso,
-            }
-        },
-        "rootIds": [root_id],
+        "nodes": {},
+        "rootIds": [],
         "selectedChildByParent": {},
     }
 

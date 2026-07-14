@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 LaikaMode = Literal["standard", "extra"]
 
@@ -44,7 +44,7 @@ class ChatMessage(BaseModel):
 
 class AssistRequest(BaseModel):
     entry_type: EntryType
-    content: str = Field(min_length=1, max_length=8000)
+    content: str = Field(min_length=0, max_length=8000)
     intent: LaikaIntent
     learning_context: LearningContext | None = None
     entry_content: str | None = Field(default=None, max_length=8000)
@@ -53,23 +53,19 @@ class AssistRequest(BaseModel):
     learner_display_name: str | None = None
     web_search: bool = False
     mode: LaikaMode = "standard"
-    collection_id: str | None = None
-    assistant_node_id: str | None = None
 
-    @field_validator("messages", mode="before")
-    @classmethod
-    def drop_empty_messages(cls, value: object) -> object:
-        if not isinstance(value, list):
-            return value
-        kept: list[object] = []
-        for item in value:
-            if isinstance(item, dict):
-                content = item.get("content", "")
-            else:
-                content = getattr(item, "content", "")
-            if str(content).strip():
-                kept.append(item)
-        return kept
+
+class StreamAssistRequest(BaseModel):
+    """Lean request for streaming — backend fetches entry_type/entry_content/messages from DB."""
+    collection_id: str
+    content: str = Field(min_length=0, max_length=8000)
+    intent: LaikaIntent
+    mode: Literal["new", "follow_up", "edit", "retry", "branch"] = "follow_up"
+    node_id: str | None = None
+    parent_node_id: str | None = None
+    web_search: bool = False
+    laika_mode: LaikaMode = "standard"
+    learning_context: LearningContext | None = None
 
 
 class LaikaSource(BaseModel):

@@ -183,7 +183,7 @@ Also returns `Set-Cookie: lunar_token=...` and `Set-Cookie: lunar_refresh=...` (
 
 ## LAIKA
 
-Auth required for `/laika/assist` (Bearer or `lunar_token` cookie). Details: [laika.md](laika.md)
+Auth required for all `/laika` routes (Bearer or `lunar_token` cookie). Details: [laika.md](laika.md)
 
 ### GET `/laika/health`
 
@@ -206,91 +206,59 @@ Reports active LLM and embedding providers.
 
 ---
 
-### POST `/laika/assist`
+### POST `/laika/assist/stream`
 
-LAIKA mentor — RAG + LLM response with required sources.
+LAIKA mentor — RAG + LLM streaming response. **Backend creates/manages conversation tree nodes** based on `mode`.
 
-**Request**
+**Request** (`StreamAssistRequest`)
 
 ```json
 {
-  "entry_type": "note",
+  "collection_id": "uuid",
   "content": "ยังสับสนเรื่อง power budget ตอน eclipse...",
   "intent": "explain",
-  "entry_content": "โน้ตต้นทางเต็ม (pinned root)",
-  "messages": [
-    {
-      "role": "user",
-      "content": "อธิบาย eclipse ให้หน่อย",
-      "created_at": "2026-07-05T14:30:00Z"
-    },
-    {
-      "role": "assistant",
-      "content": "ช่วง eclipse คือ...",
-      "created_at": "2026-07-05T14:31:00Z"
-    }
-  ],
-  "client_now": "2026-07-10T10:00:00+07:00",
+  "mode": "new",
+  "node_id": null,
+  "parent_node_id": null,
+  "web_search": false,
+  "laika_mode": "standard",
   "learning_context": {
     "course": "CUBESAT 101",
-    "completed_topics": ["3D Model", "Physics (LEO)"],
-    "arena_missions": ["Stable Orbit Loop — ผ่าน"]
+    "completed_topics": ["3D Model", "Physics (LEO)"]
   }
 }
 ```
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| `entry_type` | yes | `note` \| `idea` |
+| `collection_id` | yes | Studio collection UUID |
 | `content` | yes | Current learner message |
-| `intent` | yes | See intents below |
-| `entry_content` | no | Pinned collection root text |
-| `messages` | no | Prior turns (`role`, `content`; optional `created_at` ISO-8601 per message) |
-| `client_now` | no | Client clock ISO-8601 — used for conversation timing hints (Asia/Bangkok) |
+| `intent` | yes | `summarize` \| `explain` \| `next-step` \| `analyze` \| `innovation-path` \| `more-ideas` \| `career-path` \| `ask-anything` |
+| `mode` | yes | `new` \| `follow_up` \| `edit` \| `retry` \| `branch` |
+| `node_id` | no | Target node (required for `edit`/`retry`/`branch`) |
+| `parent_node_id` | no | Parent node (required for `branch`, optional for `follow_up`) |
+| `web_search` | no | Enable DuckDuckGo web search (default: `false`) |
+| `laika_mode` | no | `standard` \| `extra` (default: `standard`) |
 | `learning_context` | no | Space/Arena progress when available |
-| `learner_display_name` | — | **Server-injected** from auth (`display_name` or email local-part). Client body is overwritten. |
 
-The human prompt includes: learner name, current date/time, continuity hint (welcome-back vs continue without greeting), RAG context, history with timestamps, and the current message.
-
-**Response `200`**
-
-```json
-{
-  "response": "จากบทเรียน...",
-  "sources": [
-    {
-      "source_id": "lunar-power-budget",
-      "title": "LUNAR Power Budget Notes",
-      "page": null,
-      "topic": "power-budget",
-      "snippet": "Energy = 5 W × ..."
-    }
-  ]
-}
-```
-
-**Intents:** `summarize` · `explain` · `next-step` · `analyze` · `innovation-path` · `more-ideas` · `career-path`
-
-**Errors:** `401` · `422` validation · `503` LAIKA disabled · `504` timeout
-
----
-
-### POST `/laika/assist/stream`
-
-Same request body as `/laika/assist`. Returns **Server-Sent Events** (`text/event-stream`) while the LLM generates.
+Returns **Server-Sent Events** (`text/event-stream`).
 
 **Events**
 
 | Event | Data | When |
 |-------|------|------|
-| `status` | `{"phase": "embedding\|searching\|generating", "message": "..."}` | RAG pipeline progress (before tokens) |
+| `meta` | `{"user_node_id": "...", "assistant_node_id": "..."}` | Before streaming — node IDs created by backend |
+| `status` | `{"phase": "embedding\|searching\|generating", "message": "..."}` | RAG pipeline progress |
 | `token` | `{"delta": "..."}` | Each streamed text chunk |
-| `done` | `{"sources": [...]}` | After generation — same `sources[]` shape as `/laika/assist` |
+| `done` | `{"sources": [], "response": ""}` | After generation completes |
 | `error` | `{"detail": "..."}` | Provider/runtime error mid-stream |
 
 **Example**
 
 ```
+event: meta
+data: {"user_node_id": "abc-123", "assistant_node_id": "def-456"}
+
 event: status
 data: {"phase": "searching", "message": "กำลังค้นหาเอกสารอ้างอิง…"}
 
@@ -298,12 +266,10 @@ event: token
 data: {"delta": "จากบทเรียน"}
 
 event: done
-data: {"sources": [{"source_id": "lunar-power-budget", ...}]}
+data: {"sources": [], "response": ""}
 ```
 
 **Errors (HTTP):** `401` · `422` · `503` LAIKA disabled (before stream starts)
-
-Studio UI uses this endpoint for live typing effect.
 
 ---
 
@@ -418,7 +384,7 @@ Returns messages on the **active branch path** only (not the full tree). Optiona
   "title": "…",
   "content": "…",
   "at_user_node_id": "user-node-uuid",
-  "messages": [{ "id": "…", "role": "user", "content": "…", "created_at": "…" }],
+  "messages": [{ "id": "…", "role": "user", "content": "…", "created_at": "…", "updated_at": "…", "parent_id": null, "laika_intent": "explain" }],
   "user_spots": [
     {
       "user_node_id": "…",
@@ -457,7 +423,7 @@ Lightweight graph for the branch map UI (user node labels + edges, no full messa
 ```json
 {
   "collection_id": "uuid",
-  "user_nodes": [{ "id": "…", "label": "…", "created_at": "…" }],
+  "user_nodes": [{ "id": "…", "label": "…", "created_at": "…", "updated_at": "…" }],
   "edges": [{ "from_id": "…", "to_id": "…" }],
   "active_user_node_ids": ["…"],
   "active_edge_keys": ["from->to"]

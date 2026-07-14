@@ -49,9 +49,9 @@ class ConversationMessage(BaseModel):
     role: Literal["user", "assistant"]
     content: str
     created_at: str
+    updated_at: str = ""
     parent_id: str | None = None
     laika_intent: str | None = None
-    laika_sources: list[Any] | None = None
 
 
 class UserSpot(BaseModel):
@@ -84,6 +84,7 @@ class BranchMapUserNode(BaseModel):
     id: str
     label: str
     created_at: str
+    updated_at: str = ""
 
 
 class BranchMapEdge(BaseModel):

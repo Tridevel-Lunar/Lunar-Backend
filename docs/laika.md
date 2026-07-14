@@ -1,6 +1,6 @@
 # LAIKA — RAG AI Mentor
 
-LAIKA is the Studio AI mentor: RAG over a knowledge corpus + multi-provider LLM (Gemini, Groq, or host Ollama). **Persona:** gender-neutral mentor — polite Thai without gendered particles (no ค่ะ/ครับ). Responses use **Markdown** (headings, lists, bold).
+LAIKA is the Studio AI mentor: RAG over a knowledge corpus + multi-provider LLM (Gemini, DeepSeek, or host Ollama). **Persona:** gender-neutral mentor — polite Thai without gendered particles (no ค่ะ/ครับ). Responses use **Markdown** (headings, lists, bold).
 
 **API contract:** [api.md](api.md#LAIKA) · **Docker / env:** [../../docs/docker-dev.md](../../docs/docker-dev.md)
 
@@ -35,8 +35,6 @@ flowchart TD
   C -->|format_context| P[Prompt builder\n(system + human)]
   P -->|LLM stream| L[LLM provider\nLAIKA_LLM_PROVIDER]
   L -->|event: token (delta)| F
-  C -->|build_sources (dedupe)| S[sources[]]
-  S -->|event: done| F
 ```
 
 ### `/laika/assist/stream` sequence (SSE)
@@ -48,7 +46,7 @@ sequenceDiagram
   participant API as FastAPI (/laika/assist/stream)
   participant EMB as Embeddings (Gemini/Ollama)
   participant DB as Postgres+pgvector
-  participant LLM as LLM (Gemini/Groq/Ollama)
+  participant LLM as LLM (Gemini/DeepSeek/Ollama)
 
   UI->>API: POST AssistRequest
   API-->>UI: event: status {phase: "embedding"}
@@ -63,7 +61,7 @@ sequenceDiagram
     LLM-->>API: delta token(s)
     API-->>UI: event: token {delta}
   end
-  API-->>UI: event: done {sources[]}
+  API-->>UI: event: done
 ```
 
 ### Ingest → `knowledge_chunks` (offline pipeline)
@@ -83,7 +81,7 @@ flowchart LR
 | `LAIKA_LLM_PROVIDER` | Client | Default model | Required env |
 |----------------------|--------|---------------|--------------|
 | `gemini` (default) | Google Gemini | `gemini-2.0-flash` | `GEMINI_API_KEY` |
-| `groq` | Groq | `llama-3.3-70b-versatile` | `GROQ_API_KEY` |
+| `deepseek` | DeepSeek (OpenAI-compatible) | `deepseek-chat` | `DEEPSEEK_API_KEY` |
 | `ollama` | Host Ollama | `qwen2.5:7b-instruct` | `OLLAMA_BASE_URL` |
 
 | `LAIKA_EMBEDDING_PROVIDER` | Client | Default model | Required env |
@@ -91,9 +89,7 @@ flowchart LR
 | `gemini` (default) | Google | `text-embedding-004` | `GEMINI_API_KEY` |
 | `ollama` | Host Ollama | `nomic-embed-text` | `OLLAMA_BASE_URL` |
 
-Groq has **no embeddings API** — when `LAIKA_LLM_PROVIDER=groq`, set `LAIKA_EMBEDDING_PROVIDER` to `gemini` or `ollama`.
-
-Both embedding models output **768-dimensional** vectors. Changing embedding provider requires **full re-ingest**.
+Changing embedding provider requires **full re-ingest**.
 
 ## Environment variables
 
@@ -102,24 +98,29 @@ LAIKA_LLM_PROVIDER=gemini
 LAIKA_EMBEDDING_PROVIDER=gemini
 LAIKA_TOP_K=5
 LAIKA_TIMEOUT_SECONDS=60
+LAIKA_CONTEXT_WINDOW=0
+LAIKA_MAX_HISTORY_TOKENS=8000
+LAIKA_RESERVED_OUTPUT_TOKENS=1500
 
 GEMINI_API_KEY=
 GEMINI_MODEL=gemini-2.0-flash
 GEMINI_EMBEDDING_MODEL=text-embedding-004
 
-GROQ_API_KEY=
-GROQ_MODEL=llama-3.3-70b-versatile
+DEEPSEEK_API_KEY=
+DEEPSEEK_MODEL=deepseek-chat
 
 OLLAMA_BASE_URL=http://host.docker.internal:11434
 OLLAMA_LLM_MODEL=qwen2.5:7b-instruct
 OLLAMA_EMBED_MODEL=nomic-embed-text
+OLLAMA_NUM_CTX=0
+OLLAMA_KEEP_ALIVE=5m
 ```
 
 ### Example profiles
 
 **Production (Render):** `gemini` / `gemini` + `GEMINI_API_KEY`
 
-**Fast cloud dev:** `groq` / `gemini` + `GROQ_API_KEY` + `GEMINI_API_KEY`
+**Cheap cloud dev:** `deepseek` / `gemini` + `DEEPSEEK_API_KEY` + `GEMINI_API_KEY`
 
 **Fully local (Windows host Ollama):**
 
