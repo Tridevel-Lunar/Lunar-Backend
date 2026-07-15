@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     # How long to keep the Ollama model loaded in memory (e.g. "5m", "30m", "1h", "-1" for forever).
     ollama_keep_alive: str = "5m"
 
+    # Tavily (web search for RAG)
+    tavily_api_key: str = ""
+
     # DeepSeek (OpenAI-compatible API)
     deepseek_api_key: str = ""
     deepseek_model: str = "deepseek-chat"

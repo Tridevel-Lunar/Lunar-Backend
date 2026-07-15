@@ -1,13 +1,14 @@
-"""DuckDuckGo web search for LAIKA — prototype web retrieval layer.
+"""Tavily web search for LAIKA — web retrieval layer.
 
 Provides a `WebSearchResult` and `search_web()` that fetches top-N results
-from DuckDuckGo as plain-text snippets, suitable for inclusion in RAG context.
+from Tavily as clean text snippets, suitable for inclusion in RAG context.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-from duckduckgo_search import DDGS
+from tavily import TavilyClient
 
+from app.core.config import get_settings
 from app.schemas.laika import LaikaSource
 
 
@@ -18,8 +19,19 @@ class WebSearchResult:
     body: str
 
 
+_client: TavilyClient | None = None
+
+
+def _get_client() -> TavilyClient:
+    global _client
+    if _client is None:
+        settings = get_settings()
+        _client = TavilyClient(api_key=settings.tavily_api_key)
+    return _client
+
+
 def search_web(query: str, max_results: int = 3) -> list[WebSearchResult]:
-    """Run a DuckDuckGo search and return text results.
+    """Run a Tavily search and return text results.
 
     Args:
         query: The search query string.
@@ -29,16 +41,17 @@ def search_web(query: str, max_results: int = 3) -> list[WebSearchResult]:
         A list of ``WebSearchResult`` named tuples — empty on error or no results.
     """
     try:
-        with DDGS() as ddgs:
-            raw = list(ddgs.text(query, max_results=max_results))
+        client = _get_client()
+        response = client.search(query=query, max_results=max_results, search_depth="basic")
+        raw = response.get("results", [])
     except Exception:
         return []
 
     results: list[WebSearchResult] = []
     for item in raw:
         title = item.get("title", "")
-        href = item.get("href", "")
-        body = item.get("body", "")
+        href = item.get("url", "")
+        body = item.get("content", "")
         if title or body:
             results.append(WebSearchResult(title=title, href=href, body=body))
     return results

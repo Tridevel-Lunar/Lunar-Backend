@@ -131,7 +131,7 @@ def build_human_prompt(
     return "\n\n".join(parts)
 
 
-WEB_SEARCH_TOKEN_ESTIMATE = 600  # ~3 DuckDuckGo results
+WEB_SEARCH_TOKEN_ESTIMATE = 600  # ~3 Tavily results
 
 
 def compute_context_usage(

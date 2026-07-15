@@ -237,7 +237,7 @@ LAIKA mentor — RAG + LLM streaming response. **Backend creates/manages convers
 | `mode` | yes | `new` \| `follow_up` \| `edit` \| `retry` \| `branch` |
 | `node_id` | no | Target node (required for `edit`/`retry`/`branch`) |
 | `parent_node_id` | no | Parent node (required for `branch`, optional for `follow_up`) |
-| `web_search` | no | Enable DuckDuckGo web search (default: `false`) |
+| `web_search` | no | Enable Tavily web search (default: `false`) |
 | `laika_mode` | no | `standard` \| `extra` (default: `standard`) |
 | `learning_context` | no | Space/Arena progress when available |
 
