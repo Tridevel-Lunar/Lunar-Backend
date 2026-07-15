@@ -65,11 +65,15 @@ def get_or_create_google_user(
     google_sub: str,
     email: str,
     display_name: str | None,
+    picture: str | None = None,
 ) -> User:
     user = get_user_by_google_sub(db, google_sub)
     if user:
         if display_name and not user.display_name:
             user.display_name = display_name
+        if picture and not user.picture:
+            user.picture = picture
+        if (display_name and not user.display_name) or (picture and not user.picture):
             db.commit()
             db.refresh(user)
         return apply_admin_bootstrap(db, user)
@@ -85,6 +89,8 @@ def get_or_create_google_user(
         existing.google_sub = google_sub
         if display_name and not existing.display_name:
             existing.display_name = display_name
+        if picture:
+            existing.picture = picture
         db.commit()
         db.refresh(existing)
         return apply_admin_bootstrap(db, existing)
@@ -93,6 +99,7 @@ def get_or_create_google_user(
         email=normalized_email,
         google_sub=google_sub,
         display_name=display_name,
+        picture=picture,
         hashed_password=None,
         role=ROLE_LEARNER,
     )

@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 LaikaMode = Literal["standard", "extra"]
 
@@ -53,6 +53,17 @@ class AssistRequest(BaseModel):
     learner_display_name: str | None = None
     web_search: bool = False
     mode: LaikaMode = "standard"
+
+    @model_validator(mode="before")
+    @classmethod
+    def drop_empty_messages(cls, data: dict) -> dict:
+        raw = data.get("messages")
+        if isinstance(raw, list):
+            data["messages"] = [
+                m for m in raw
+                if isinstance(m, dict) and m.get("content", "").strip()
+            ]
+        return data
 
 
 class StreamAssistRequest(BaseModel):

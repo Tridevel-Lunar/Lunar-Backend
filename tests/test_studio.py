@@ -20,8 +20,8 @@ def test_create_and_get_collection(client, auth_headers):
     assert data["type"] == "note"
     assert data["title"] == "ทดสอบ power budget"
     assert data["content"] == "ทดสอบ power budget"
-    assert data["tree"]["rootIds"]
-    assert len(data["tree"]["nodes"]) == 1
+    assert data["tree"]["rootIds"] == []
+    assert data["tree"]["nodes"] == {}
 
     collection_id = data["id"]
     get_resp = client.get(f"/studio/collections/{collection_id}", headers=auth_headers)
@@ -37,8 +37,16 @@ def test_patch_collection_tree(client, auth_headers):
     )
     entry = create.json()
     tree = entry["tree"]
+    root_id = "user-root-1"
     assistant_id = "assistant-1"
-    root_id = tree["rootIds"][0]
+    tree["nodes"][root_id] = {
+        "id": root_id,
+        "role": "user",
+        "content": "ไอเดียดาวเทียม",
+        "createdAt": entry["created_at"],
+        "parentId": None,
+    }
+    tree["rootIds"] = [root_id]
     tree["nodes"][assistant_id] = {
         "id": assistant_id,
         "role": "assistant",
@@ -76,7 +84,23 @@ def test_get_conversation_and_select_branch(client, auth_headers):
     )
     entry = create.json()
     collection_id = entry["id"]
-    root_id = entry["tree"]["rootIds"][0]
+
+    # Add a root user node via PATCH (tree starts empty)
+    root_id = "user-root-1"
+    tree = entry["tree"]
+    tree["nodes"][root_id] = {
+        "id": root_id,
+        "role": "user",
+        "content": "root question",
+        "createdAt": entry["created_at"],
+        "parentId": None,
+    }
+    tree["rootIds"] = [root_id]
+    client.patch(
+        f"/studio/collections/{collection_id}",
+        headers=auth_headers,
+        json={"title": entry["title"], "content": entry["content"], "tree": tree},
+    )
 
     conv = client.get(f"/studio/collections/{collection_id}/conversation", headers=auth_headers)
     assert conv.status_code == 200
