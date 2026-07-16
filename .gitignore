@@ -33,5 +33,4 @@ Thumbs.db
 # Data / secrets
 *.db
 *.sqlite3
-data/
 logs/
