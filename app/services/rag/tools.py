@@ -2,7 +2,7 @@
 
 Tools:
 - ``search_knowledge`` — pgvector similarity search over LUNAR's engineering corpus.
-- ``search_web`` — DuckDuckGo web search for current / external information.
+- ``search_web`` — Tavily web search for current / external information.
 """
 
 from langchain_core.tools import tool
@@ -13,7 +13,7 @@ from app.services.rag.retriever import PgVectorRetriever
 from app.services.rag.sources import build_sources
 from app.services.rag.web_search import (
     format_web_results,
-    search_web as search_web_ddg,
+    search_web as search_web_tavily,
     web_results_to_sources,
 )
 
@@ -44,7 +44,7 @@ def make_web_tool():
         Use for recent news, pricing, real-world missions, career info,
         or anything outside the static LUNAR knowledge base.
         """
-        results = search_web_ddg(query, max_results=3)
+        results = search_web_tavily(query, max_results=3)
         return format_web_results(results)
 
     return search_web
@@ -65,7 +65,7 @@ def execute_tool_call(
 
     if name == "search_web":
         query = args.get("query", "")
-        results = search_web_ddg(query, max_results=3)
+        results = search_web_tavily(query, max_results=3)
         sources = web_results_to_sources(results)
         return format_web_results(results), sources
 

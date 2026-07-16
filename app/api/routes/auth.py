@@ -203,6 +203,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         google_sub=google_sub,
         email=email,
         display_name=userinfo.get("name"),
+        picture=userinfo.get("picture"),
     )
     access_token = issue_token_for_user(user)
     refresh_token = create_refresh_token(db, user.id)
@@ -247,5 +248,6 @@ def google_onetap(payload: GoogleOneTapRequest, db: Session = Depends(get_db)) -
         google_sub=token_payload["sub"],
         email=token_payload["email"],
         display_name=token_payload.get("name"),
+        picture=token_payload.get("picture"),
     )
     return _token_response_with_cookie(user, db, status.HTTP_200_OK)

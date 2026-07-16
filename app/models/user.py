@@ -15,6 +15,7 @@ class User(Base):
     hashed_password: Mapped[str | None] = mapped_column(String(255), nullable=True)
     google_sub: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True)
     display_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    picture: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     role: Mapped[str] = mapped_column(String(32), nullable=False, default="learner")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False

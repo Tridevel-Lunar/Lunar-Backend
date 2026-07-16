@@ -1,0 +1,54 @@
+# Knowledge sources for LAIKA RAG — central manifest
+# Sync: python -m scripts.sync_knowledge_manifest  |  Backoffice → Sync manifest
+
+sources:
+  # ── Space: CUBESAT FOR BEGINNER ────────────────────────────────────
+  - id: space-cubesat-overview
+    title: "Overview of Satellite"
+    module: space
+    stage: cubesat-for-beginner
+    order: 1
+    path: space/cubesat-for-beginner/Module1_Overview_of_Satellite_Content.md
+    type: markdown
+    language: th
+    topic: satellite-basics
+    license: "LUNAR internal curriculum"
+    audience: learner
+
+  - id: space-cubesat-anatomy
+    title: "Anatomy of CubeSat"
+    module: space
+    stage: cubesat-for-beginner
+    order: 2
+    path: space/cubesat-for-beginner/Module2_Anatomy_of_CubeSat_Content.md
+    type: markdown
+    language: th
+    topic: cubesat-structure
+    license: "LUNAR internal curriculum"
+    audience: learner
+
+  - id: space-cubesat-physics
+    title: "Physics for Space"
+    module: space
+    stage: cubesat-for-beginner
+    order: 3
+    path: space/cubesat-for-beginner/Module3_Physics_for_Space_LAIKA_v1.md
+    type: markdown
+    language: th
+    topic: orbital-mechanics
+    license: "LUNAR internal curriculum"
+    audience: learner
+
+  - id: space-cubesat-programming
+    title: "Programming for CubeSat"
+    module: space
+    stage: cubesat-for-beginner
+    order: 4
+    path: space/cubesat-for-beginner/Module4_Programming_Content.md
+    type: markdown
+    language: th
+    topic: programming
+    license: "LUNAR internal curriculum"
+    audience: learner
+
+

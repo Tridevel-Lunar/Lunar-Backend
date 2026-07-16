@@ -68,9 +68,9 @@ def test_assist_request_drops_empty_messages() -> None:
 
 
 
-@patch("app.services.laika_stream.stream_laika_assist")
+@patch("app.api.routes.laika.iter_laika_assist_sse")
 def test_laika_assist_stream_returns_sse(
-    mock_stream: MagicMock,
+    mock_iter: MagicMock,
     client: TestClient,
     auth_headers: dict[str, str],
     monkeypatch: pytest.MonkeyPatch,
@@ -78,33 +78,22 @@ def test_laika_assist_stream_returns_sse(
     monkeypatch.setenv("GEMINI_API_KEY", "test-key")
     get_settings.cache_clear()
 
-    def fake_stream(_db, _settings, _request, cancel_event=None):
-        yield ("status", "embedding")
-        yield ("status", "searching")
-        yield ("status", "generating")
-        yield ("token", "สวัสดี")
-        yield ("token", " LAIKA")
-        yield (
-            "done",
-            [
-                LaikaSource(
-                    source_id="lunar-power-budget",
-                    title="LUNAR Power Budget Notes",
-                    page=None,
-                    topic="power-budget",
-                    snippet="Energy = 5 W × …",
-                )
-            ],
-        )
+    def fake_iter(*_args, **_kwargs):
+        yield "event: status\ndata: {\"phase\": \"embedding\"}\n\n"
+        yield "event: status\ndata: {\"phase\": \"searching\"}\n\n"
+        yield "event: status\ndata: {\"phase\": \"generating\"}\n\n"
+        yield "event: token\ndata: {\"delta\": \"สวัสดี\"}\n\n"
+        yield "event: token\ndata: {\"delta\": \" LAIKA\"}\n\n"
+        yield "event: done\ndata: {\"sources\": [{\"source_id\": \"lunar-power-budget\", \"title\": \"LUNAR Power Budget Notes\", \"page\": null, \"topic\": \"power-budget\", \"snippet\": \"Energy = 5 W × …\"}], \"response\": \"\"}\n\n"
 
-    mock_stream.side_effect = fake_stream
+    mock_iter.side_effect = fake_iter
 
     with client.stream(
         "POST",
         "/laika/assist/stream",
         headers=auth_headers,
         json={
-            "entry_type": "note",
+            "collection_id": "00000000-0000-0000-0000-000000000000",
             "content": "แบต 30% พอไหม",
             "intent": "explain",
         },
@@ -133,9 +122,9 @@ def test_laika_assist_stream_requires_auth(client: TestClient) -> None:
     assert response.status_code == 401
 
 
-@patch("app.services.laika_stream.stream_laika_assist")
+@patch("app.api.routes.laika.iter_laika_assist_sse")
 def test_laika_assist_stream_emits_error_event(
-    mock_stream: MagicMock,
+    mock_iter: MagicMock,
     client: TestClient,
     auth_headers: dict[str, str],
     monkeypatch: pytest.MonkeyPatch,
@@ -143,18 +132,17 @@ def test_laika_assist_stream_emits_error_event(
     monkeypatch.setenv("GEMINI_API_KEY", "test-key")
     get_settings.cache_clear()
 
-    def fake_stream(_db, _settings, _request, cancel_event=None):
-        raise RuntimeError("CUDA error: shared object initialization failed")
-        yield  # pragma: no cover
+    def fake_iter(*_args, **_kwargs):
+        yield "event: error\ndata: {\"detail\": \"CUDA error: shared object initialization failed\"}\n\n"
 
-    mock_stream.side_effect = fake_stream
+    mock_iter.side_effect = fake_iter
 
     with client.stream(
         "POST",
         "/laika/assist/stream",
         headers=auth_headers,
         json={
-            "entry_type": "note",
+            "collection_id": "00000000-0000-0000-0000-000000000000",
             "content": "test",
             "intent": "explain",
         },
