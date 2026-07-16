@@ -429,3 +429,44 @@ Lightweight graph for the branch map UI (user node labels + edges, no full messa
   "active_edge_keys": ["from->to"]
 }
 ```
+
+---
+
+## Arena
+
+Auth required (`get_current_user`). Attempt AST is stored **in-memory** this stage (no DB) — lost on process restart.
+
+### GET `/arena/missions/{mission_id}`
+
+Pack metadata for the Blockly toolbox (no secrets).
+
+**Response `200`**
+
+```json
+{
+  "id": "leo-orbital-launch",
+  "toolboxId": "m01-beginner",
+  "title": "LEO ORBITAL LAUNCH",
+  "code": "MISSION 01",
+  "level": "BEGINNER",
+  "playable": true,
+  "allowedOps": ["on_start", "power_bus_on", "…"],
+  "limits": { "maxBlocks": 40, "maxDepth": 12, "maxSteps": 500, "wallMs": 3000 }
+}
+```
+
+**Response `404`** — unknown mission (e.g. `coming-soon`).
+
+### GET `/arena/missions/{mission_id}/attempt`
+
+Load draft AST for the current user (`ast` may be `null`).
+
+### PUT `/arena/missions/{mission_id}/attempt`
+
+Save draft AST.
+
+```json
+{ "ast": { "type": "program", "body": [] } }
+```
+
+`POST .../runs` (simulate) is **not** implemented yet.

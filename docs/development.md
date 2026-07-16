@@ -12,9 +12,9 @@ Python **FastAPI** — API server เชื่อม frontend กับ auth, �
 | หน้าที่ | รายละเอียด | สถานะ |
 |---------|------------|--------|
 | **Authentication** | register, login, logout, refresh, JWT + httpOnly cookies, Google Sign-In | ✓ |
-| **API Gateway** | รับ request จาก frontend — รันบล็อกโค้ด, ส่งผล simulation กลับ | planned |
+| **API Gateway** | รับ request จาก frontend — auth, studio, laika, **arena attempt save/load** | live (runs/sim planned) |
 | **Orbital / Physics** | คำนวณสมการฟิสิกส์อวกาศ, วงโคจร, power budget | planned |
-| **Logging** | โครงสร้างข้อมูล log จากการจำลอง | planned |
+| **Logging** | โครงสร้างข้อมูล log จากจำลอง | planned |
 | **LAIKA** | LLM (Gemini/DeepSeek/Ollama) + RAG ให้คำแนะนำผู้เรียน | ✓ |
 | **Satellite imagery** | ส่งข้อมูลภาพดาวเทียมกลับ frontend | planned |
 
@@ -251,7 +251,19 @@ Backend ใช้ **pytest** + FastAPI `TestClient` — unit/API tests ใช้
 - Session: httpOnly cookies `lunar_token` + `lunar_refresh` (`credentials: "include"` บน frontend)
 - Access token หมดอายุ → frontend เรียก `POST /auth/refresh` อัตโนมัติ (ดู `frontend/src/lib/auth.ts`, `api.ts`)
 - ฟิสิกส์/วงโคจรรันฝั่ง backend; frontend แสดงผล
-- Blockly block definitions อาจ share เป็น JSON schema ผ่าน API ไม่ใช่ shared package
+- Blockly block definitions / AST: FE emits JSON AST; BE stores draft via `/arena` (in-memory this stage). Interpreter + `POST .../runs` planned — see [api.md](api.md#arena) and workspace `visual-programming-system-design v2.md`
+
+### Arena (mock stage)
+
+| Path | Role |
+|------|------|
+| `app/api/routes/arena.py` | `GET` mission · `GET`/`PUT` attempt |
+| `app/schemas/arena.py` | Pydantic DTOs |
+| `app/services/arena.py` | In-memory attempt store `(user_id, mission_id) → ast` |
+| `app/arena/missions/leo_orbital_launch.py` | M01 pack metadata |
+| `tests/test_arena.py` | Auth + save/load round-trip |
+
+No Alembic / DB table yet — process restart clears attempts.
 
 ## Deploy (Render — Docker)
 
