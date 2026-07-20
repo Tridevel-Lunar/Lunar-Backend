@@ -434,11 +434,11 @@ Lightweight graph for the branch map UI (user node labels + edges, no full messa
 
 ## Arena
 
-Auth required (`get_current_user`). Attempt AST is stored **in-memory** this stage (no DB) — lost on process restart.
+Auth required (`get_current_user`). Attempt AST + last `RunResult` are stored in PostgreSQL table `arena_attempts` (unique per `user_id` + `mission_id`). Mission packs stay in code (`app/arena/missions/`).
 
 ### GET `/arena/missions/{mission_id}`
 
-Pack metadata for the Blockly toolbox (no secrets).
+Pack metadata for the Blockly toolbox (no secrets / no world seed).
 
 **Response `200`**
 
@@ -459,14 +459,55 @@ Pack metadata for the Blockly toolbox (no secrets).
 
 ### GET `/arena/missions/{mission_id}/attempt`
 
-Load draft AST for the current user (`ast` may be `null`).
+Load draft AST + last run result for the current user (`ast` / `last_result` may be `null`).
 
 ### PUT `/arena/missions/{mission_id}/attempt`
 
-Save draft AST.
+Save draft AST (no simulation).
 
 ```json
 { "ast": { "type": "program", "body": [] } }
 ```
 
-`POST .../runs` (simulate) is **not** implemented yet.
+### POST `/arena/missions/{mission_id}/runs`
+
+Validate AST against the mission pack (`allowedOps`, size/depth), enqueue an RQ job on Redis (`arena-runs` queue). The `arena_worker` container runs the tree-walking interpreter and persists `ast` + `last_result` on the attempt.
+
+```json
+{ "ast": { "type": "program", "body": [/* … */] } }
+```
+
+**Response `200`** — job accepted:
+
+```json
+{
+  "job_id": "a1b2c3d4-…",
+  "status": "pending",
+  "mission_id": "leo-orbital-launch"
+}
+```
+
+Poll **`GET /arena/missions/{mission_id}/runs/{job_id}`** until `status` is `finished` or `failed`.
+
+### GET `/arena/missions/{mission_id}/runs/{job_id}`
+
+Poll run job status. Job metadata includes `user_id` — only the owning session can read the job.
+
+**Response `200`** — `RunJobStatusResponse`:
+
+```json
+{
+  "job_id": "a1b2c3d4-…",
+  "status": "finished",
+  "mission_id": "leo-orbital-launch",
+  "result": { /* RunResult — same shape as before */ },
+  "error": null
+}
+```
+
+`result.status`: `passed` | `failed` | `error` | `timeout`.
+
+**Response `422`** — invalid AST (unknown op, too many blocks, bad shape).  
+**Response `404`** — unknown mission or job.
+
+**Local dev:** `redis` + `arena_worker` services in workspace compose. Set `ARENA_RUN_SYNC=true` to run jobs in-process without Redis (pytest default).

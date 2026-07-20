@@ -68,6 +68,7 @@ pytest tests/test_auth.py
 | Users DB | ✓ PostgreSQL + Alembic migrations |
 | Health | ✓ `GET /health` |
 | LAIKA / Studio | ✓ (ดู [docs/laika.md](docs/laika.md)) |
+| Arena (visual coding) | ✓ M01 pack · attempt CRUD · RQ runs (`arena_worker` + Redis in compose) |
 
 ## Stack (สรุป)
 
@@ -78,5 +79,6 @@ pytest tests/test_auth.py
 | Database | PostgreSQL + pgvector, SQLAlchemy, Alembic |
 | Auth | passlib/bcrypt, python-jose, Authlib, google-auth |
 | LAIKA | LangChain RAG + Gemini / Groq / Ollama |
+| Arena | RQ + Redis worker · tree-walking interpreter · M01 discrete world |
 
 Production deploy (Render Docker): [`Dockerfile`](Dockerfile) — ดู [docs/development.md](docs/development.md#deploy-render--docker)

@@ -61,6 +61,12 @@ class Settings(BaseSettings):
     admin_emails: str = ""
     knowledge_max_upload_bytes: int = 10 * 1024 * 1024
 
+    # Arena RQ worker (POC)
+    redis_url: str = "redis://redis:6379/0"
+    arena_rq_queue_name: str = "arena-runs"
+    arena_run_sync: bool = False
+    arena_run_job_timeout: int = 30
+
     @field_validator("laika_llm_provider", mode="before")
     @classmethod
     def normalize_llm_provider(cls, value: object) -> object:

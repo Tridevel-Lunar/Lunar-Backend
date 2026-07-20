@@ -12,7 +12,7 @@ Python **FastAPI** — API server เชื่อม frontend กับ auth, �
 | หน้าที่ | รายละเอียด | สถานะ |
 |---------|------------|--------|
 | **Authentication** | register, login, logout, refresh, JWT + httpOnly cookies, Google Sign-In | ✓ |
-| **API Gateway** | รับ request จาก frontend — auth, studio, laika, **arena attempt save/load** | live (runs/sim planned) |
+| **API Gateway** | รับ request จาก frontend — auth, studio, laika, **arena** (attempt CRUD + RQ runs) | live |
 | **Orbital / Physics** | คำนวณสมการฟิสิกส์อวกาศ, วงโคจร, power budget | planned |
 | **Logging** | โครงสร้างข้อมูล log จากจำลอง | planned |
 | **LAIKA** | LLM (Gemini/DeepSeek/Ollama) + RAG ให้คำแนะนำผู้เรียน | ✓ |
@@ -117,14 +117,16 @@ backend/
 │   │       ├── auth.py         # register, login, logout, refresh, me, google/*
 │   │       ├── laika.py        # assist, stream, context usage
 │   │       ├── studio.py       # collections, conversation, branch map
+│   │       ├── arena.py        # mission pack, attempt, run jobs (RQ)
 │   │       └── backoffice.py   # knowledge admin
+│   ├── arena/                  # engine, RQ queue, interpreter, M01 world
 │   ├── core/config.py, cookies.py, security.py
 │   ├── db/session.py, base.py
-│   ├── models/user.py, refresh_token.py, knowledge_*.py, studio_collection.py
-│   ├── schemas/auth.py, laika.py, studio.py, backoffice.py
+│   ├── models/user.py, refresh_token.py, knowledge_*.py, studio_collection.py, arena_attempt.py
+│   ├── schemas/auth.py, laika.py, studio.py, arena.py, backoffice.py
 │   ├── services/
 │   │   ├── auth.py, google_auth.py, refresh_token.py, rbac.py, user_admin.py
-│   │   ├── laika.py, studio.py, studio_tree.py, knowledge/
+│   │   ├── laika.py, studio.py, studio_tree.py, arena.py, knowledge/
 │   │   └── rag/                # providers, retriever, chain, context_window
 │   └── main.py
 ├── data/knowledge/             # RAG corpus + manifest.yaml
@@ -135,6 +137,7 @@ backend/
 │   ├── test_auth.py
 │   ├── test_laika.py, test_laika_context.py, test_laika_providers.py
 │   ├── test_studio.py, test_backoffice.py, test_rbac.py
+│   ├── test_arena.py, test_arena_interpreter.py, test_arena_rq.py
 │   └── test_health.py, test_security.py
 ├── Dockerfile, Dockerfile.dev
 ├── requirements.txt
@@ -160,6 +163,10 @@ backend/
 | `GOOGLE_CLIENT_SECRET` | _(ว่าง)_ | redirect OAuth เท่านั้น — ห้ามส่งไป frontend |
 | `GOOGLE_REDIRECT_URI` | `http://localhost:3000/api/auth/google/callback` | ผ่าน Vite proxy (ต้องตรงกับ Google Cloud Console) |
 | `AUTH_COOKIE_SECURE` | `false` | ตั้ง `true` ใน production (HTTPS) |
+| `REDIS_URL` | `redis://localhost:6379/0` | ใน Docker compose ตั้งเป็น host `redis` — broker สำหรับ Arena RQ |
+| `ARENA_RUN_SYNC` | `false` | `true` = รัน interpreter ใน API process (pytest); ไม่ต้อง Redis/worker |
+| `ARENA_RQ_QUEUE_NAME` | `arena-runs` | ชื่อ RQ queue |
+| `ARENA_RUN_JOB_TIMEOUT` | `30` | RQ job timeout (วินาที) |
 
 ### Google Cloud Console (dev)
 
@@ -209,17 +216,22 @@ Frontend เรียกผ่าน `/api` — Vite proxy strip prefix (`/api/a
 
 Backend ใช้ **pytest** + FastAPI `TestClient` — unit/API tests ใช้ **SQLite in-memory** (ไม่ต้องรัน Postgres)
 
+Arena tests ตั้ง `ARENA_RUN_SYNC=true` (default ใน `conftest.py`) — interpreter รันใน process เดียวกับ API ไม่ต้อง Redis/`arena_worker`
+
 ### โครงสร้าง
 
 | ไฟล์ | ครอบคลุม |
 |------|-----------|
-| `tests/conftest.py` | SQLite DB, `client`, `auth_headers`, `google_client_id`, `google_token_payload` |
+| `tests/conftest.py` | SQLite DB, `client`, `auth_headers`, `ARENA_RUN_SYNC`, `clear_sync_jobs` |
 | `tests/test_health.py` | `GET /health` |
 | `tests/test_security.py` | password hash/verify, JWT create/decode |
 | `tests/test_auth.py` | register, login, cookies, refresh rotation, `/auth/me`, logout, Google One Tap (mocked), 401/409/503 |
 | `tests/test_laika.py` | `/laika/health`, `/laika/assist`, sources[], 503 when disabled |
 | `tests/test_laika_context.py` | Context usage, history timestamps, learner name in prompt |
 | `tests/test_studio.py` | Studio collections + conversation/branch APIs |
+| `tests/test_arena.py` | Arena pack, attempt CRUD, run job enqueue + poll (sync mode) |
+| `tests/test_arena_interpreter.py` | Validator + M01 interpreter fixtures |
+| `tests/test_arena_rq.py` | Optional RQ integration (`RUN_ARENA_RQ_INTEGRATION=1`, `-m integration`) |
 | `tests/test_laika_providers.py` | Provider factory validation |
 
 ### หมายเหตุ
@@ -251,19 +263,27 @@ Backend ใช้ **pytest** + FastAPI `TestClient` — unit/API tests ใช้
 - Session: httpOnly cookies `lunar_token` + `lunar_refresh` (`credentials: "include"` บน frontend)
 - Access token หมดอายุ → frontend เรียก `POST /auth/refresh` อัตโนมัติ (ดู `frontend/src/lib/auth.ts`, `api.ts`)
 - ฟิสิกส์/วงโคจรรันฝั่ง backend; frontend แสดงผล
-- Blockly block definitions / AST: FE emits JSON AST; BE stores draft via `/arena` (in-memory this stage). Interpreter + `POST .../runs` planned — see [api.md](api.md#arena) and workspace `visual-programming-system-design v2.md`
+- Blockly block definitions / AST: FE emits JSON AST; BE stores drafts in `arena_attempts`; runs via `POST /arena/missions/{id}/runs` (enqueue RQ) → `arena_worker` → `execute_run()`; FE polls `GET .../runs/{job_id}`. See [api.md](api.md#arena) and workspace `docs/visual-programming-system-design v2.md`
 
-### Arena (mock stage)
+### Arena (visual coding)
 
 | Path | Role |
 |------|------|
-| `app/api/routes/arena.py` | `GET` mission · `GET`/`PUT` attempt |
-| `app/schemas/arena.py` | Pydantic DTOs |
-| `app/services/arena.py` | In-memory attempt store `(user_id, mission_id) → ast` |
-| `app/arena/missions/leo_orbital_launch.py` | M01 pack metadata |
-| `tests/test_arena.py` | Auth + save/load round-trip |
+| `app/api/routes/arena.py` | `GET` mission · `GET`/`PUT` attempt · `POST` runs (enqueue) · `GET` runs/{job_id} (poll) |
+| `app/schemas/arena.py` | Pack / attempt / `RunResult` / job DTOs |
+| `app/services/arena.py` | DB attempts; validate + enqueue |
+| `app/arena/engine.py` | Pure `execute_run()` (validator + interpret + persist) |
+| `app/arena/queue.py` | RQ enqueue + job status (`ARENA_RUN_SYNC` for pytest) |
+| `app/arena/tasks.py` | RQ worker task |
+| `app/arena/worker.py` | Worker CLI entry (`python -m app.arena.worker`) |
+| `app/models/arena_attempt.py` | `arena_attempts` (`ast` + `last_result` JSONB) |
+| `app/arena/missions/leo_orbital_launch.py` | M01 pack (static; not in DB) |
+| `app/arena/ast/validator.py` | `allowedOps` + size/depth |
+| `app/arena/interpreter/interpreter.py` | Tree walker + caps |
+| `app/arena/world/m01.py` | Discrete M01 rules + grading |
+| `tests/test_arena.py` | API fixtures (`ARENA_RUN_SYNC=true`) |
 
-No Alembic / DB table yet — process restart clears attempts.
+Compose (workspace): `redis` + `arena_worker` peer services. Env: `REDIS_URL`, `ARENA_RUN_SYNC` (pytest: `true`). Migration: `009_arena_attempts`.
 
 ## Deploy (Render — Docker)
 

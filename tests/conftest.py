@@ -3,6 +3,8 @@ import os
 os.environ.setdefault("SECRET_KEY", "test-secret-key-for-pytest")
 os.environ.setdefault("GOOGLE_CLIENT_ID", "")
 os.environ.setdefault("GOOGLE_CLIENT_SECRET", "")
+# Force in-process runs in tests (compose may set ARENA_RUN_SYNC=false).
+os.environ["ARENA_RUN_SYNC"] = "true"
 
 import pytest
 from fastapi.testclient import TestClient
@@ -22,6 +24,19 @@ engine = create_engine(
     poolclass=StaticPool,
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+@pytest.fixture(autouse=True)
+def _clear_arena_sync_jobs():
+    from app.arena.queue import clear_sync_jobs
+    from app.core.config import get_settings
+
+    os.environ["ARENA_RUN_SYNC"] = "true"
+    get_settings.cache_clear()
+    clear_sync_jobs()
+    yield
+    clear_sync_jobs()
+    get_settings.cache_clear()
 
 
 @pytest.fixture()

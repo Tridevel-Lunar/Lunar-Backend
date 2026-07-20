@@ -25,6 +25,8 @@ pgvector>=0.5.0,<1.0.0
 pyyaml>=6.0.3,<7.0.0
 tenacity>=9.1.4,<10.0.0
 tavily-python>=0.7.26,<1.0.0
+redis>=5.0,<6
+rq>=2.0,<3
 
 # Dev / test
 pytest>=9.1.1,<10.0.0
