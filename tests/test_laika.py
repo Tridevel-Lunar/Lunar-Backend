@@ -110,6 +110,35 @@ def test_laika_assist_stream_returns_sse(
     assert "event: done" in body
 
 
+def test_stream_event_to_sse_preserves_done_sources() -> None:
+    from app.schemas.laika import LaikaSource
+    from app.services.laika_stream import stream_event_to_sse
+
+    sse = stream_event_to_sse(
+        "done",
+        {
+            "sources": [
+                LaikaSource(
+                    source_id="lunar-power-budget",
+                    title="LUNAR Power Budget Notes",
+                    page=None,
+                    topic="power-budget",
+                    snippet="Energy = 5 W × …",
+                )
+            ],
+            "response": "จากบทเรียนนี้",
+            "finish_reason": "stop",
+            "truncated": False,
+        },
+    )
+
+    assert "event: done" in sse
+    assert '"source_id": "lunar-power-budget"' in sse
+    assert '"response": "จากบทเรียนนี้"' in sse
+    assert '"finish_reason": "stop"' in sse
+    assert '"truncated": false' in sse
+
+
 def test_laika_assist_stream_requires_auth(client: TestClient) -> None:
     response = client.post(
         "/laika/assist/stream",

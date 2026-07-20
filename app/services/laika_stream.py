@@ -20,6 +20,35 @@ from app.services.rag.learner import resolve_learner_display_name
 from app.services.rag.status import laika_status_message
 
 
+def _serialize_source(item: object) -> dict[str, Any]:
+    if hasattr(item, "model_dump"):
+        return item.model_dump()  # type: ignore[no-any-return]
+    if isinstance(item, dict):
+        return item
+    raise TypeError(f"Unsupported LAIKA source type: {type(item)!r}")
+
+
+def _serialize_done_payload(value: object) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {
+            "sources": [],
+            "response": "",
+            "finish_reason": None,
+            "truncated": False,
+        }
+
+    sources_raw = value.get("sources") or []
+    sources = [_serialize_source(item) for item in sources_raw] if isinstance(sources_raw, list) else []
+    response = value.get("response")
+    finish_reason = value.get("finish_reason")
+    return {
+        "sources": sources,
+        "response": response if isinstance(response, str) else "",
+        "finish_reason": finish_reason if isinstance(finish_reason, str) else None,
+        "truncated": value.get("truncated") is True,
+    }
+
+
 def stream_event_to_ws_message(event_type: str, value: object) -> dict[str, Any]:
     if event_type == "status":
         phase = value
@@ -32,8 +61,14 @@ def stream_event_to_ws_message(event_type: str, value: object) -> dict[str, Any]
     if event_type == "token":
         return {"type": "token", "delta": value}
     if event_type == "done":
-        return {"type": "done", "sources": [], "response": ""}
-    return {"type": "done", "sources": [], "response": ""}
+        return {"type": "done", **_serialize_done_payload(value)}
+    return {
+        "type": "done",
+        "sources": [],
+        "response": "",
+        "finish_reason": None,
+        "truncated": False,
+    }
 
 
 def format_sse(event: str, data: object) -> str:
@@ -50,7 +85,15 @@ def stream_event_to_sse(event_type: str, value: object) -> str:
         )
     if kind == "token":
         return format_sse("token", {"delta": message["delta"]})
-    return format_sse("done", {"sources": [], "response": message.get("response", "")})
+    return format_sse(
+        "done",
+        {
+            "sources": message.get("sources", []),
+            "response": message.get("response", ""),
+            "finish_reason": message.get("finish_reason"),
+            "truncated": message.get("truncated", False),
+        },
+    )
 
 
 def _save_streaming_buffer(

@@ -7,11 +7,17 @@ os.environ.setdefault("SECRET_KEY", "test-secret-key-for-pytest")
 from app.services.knowledge.manifest import load_manifest
 
 
-def test_manifest_loads_all_modules() -> None:
+def test_manifest_loads_space_sources() -> None:
     sources = load_manifest()
     modules = {s["module"] for s in sources}
-    assert modules == {"space", "arena", "studio"}
-    assert len(sources) == 10
+    assert modules == {"space"}
+    assert len(sources) == 4
+    assert {s["id"] for s in sources} == {
+        "space-cubesat-overview",
+        "space-cubesat-anatomy",
+        "space-cubesat-physics",
+        "space-cubesat-programming",
+    }
 
 
 def test_manifest_ids_are_unique() -> None:

@@ -112,6 +112,8 @@ Returns current user. Use Swagger **Authorize** with `Bearer <token>`, or call f
   "id": "uuid",
   "email": "learner@example.com",
   "display_name": "นักเรียน LUNAR",
+  "picture": null,
+  "role": "learner",
   "created_at": "2026-06-21T12:00:00Z"
 }
 ```
@@ -183,7 +185,7 @@ Also returns `Set-Cookie: lunar_token=...` and `Set-Cookie: lunar_refresh=...` (
 
 ## LAIKA
 
-Auth required for all `/laika` routes (Bearer or `lunar_token` cookie). Details: [laika.md](laika.md)
+Auth required for most `/laika` routes (Bearer or `lunar_token` cookie). `GET /laika/health` is public. Details: [laika.md](laika.md)
 
 ### GET `/laika/health`
 
@@ -323,7 +325,7 @@ List summaries for the current user (no full `tree` — reduces payload on landi
 
 ### POST `/studio/collections`
 
-Create a collection. Server derives `title` and initial `tree` (root user node).
+Create a collection. Server derives `title` and stores an **empty** conversation tree (`nodes` / `rootIds` start empty). The first LAIKA stream call creates the root user + assistant nodes.
 
 **Request**
 

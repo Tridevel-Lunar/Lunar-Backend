@@ -97,7 +97,7 @@ Redirect callback ตรวจ `email_verified` เช่นเดียวก�
 ### AI (LAIKA)
 
 ```
-ผู้เรียน → Frontend → FastAPI → [RAG: LangChain] → LLM provider (Gemini/Groq/Ollama) → คำตอบ + sources
+ผู้เรียน → Frontend → FastAPI → [RAG: LangChain] → LLM provider (Gemini/DeepSeek/Ollama) → คำตอบ + sources
 ```
 
 - RAG ลด hallucination — ตอบจากเอกสารวิศวกรรมอวกาศจริง
@@ -217,7 +217,7 @@ Backend ใช้ **pytest** + FastAPI `TestClient` — unit/API tests ใช้
 | `tests/test_health.py` | `GET /health` |
 | `tests/test_security.py` | password hash/verify, JWT create/decode |
 | `tests/test_auth.py` | register, login, cookies, refresh rotation, `/auth/me`, logout, Google One Tap (mocked), 401/409/503 |
-| `tests/test_laika.py` | `/laika/health`, `/laika/assist`, sources[], 503 when disabled |
+| `tests/test_laika.py` | `/laika/health`, `/laika/assist/stream`, done sources[], 503 when disabled |
 | `tests/test_laika_context.py` | Context usage, history timestamps, learner name in prompt |
 | `tests/test_studio.py` | Studio collections + conversation/branch APIs |
 | `tests/test_laika_providers.py` | Provider factory validation |
