@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.api.routes import arena, auth, backoffice, laika, studio
+from app.api.routes import arena, auth, backoffice, laika, space, studio
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -17,6 +17,7 @@ app = FastAPI(
         {"name": "laika", "description": "LAIKA AI mentor (RAG + multi-provider LLM)"},
         {"name": "studio", "description": "Studio collections (notes, ideas, conversation trees)"},
         {"name": "arena", "description": "Arena missions (Blockly attempt save/load)"},
+        {"name": "space", "description": "Space course/module completion progress"},
         {"name": "backoffice", "description": "Internal admin tools (knowledge ingest)"},
     ],
 )
@@ -35,6 +36,7 @@ app.include_router(backoffice.router)
 app.include_router(laika.router)
 app.include_router(studio.router)
 app.include_router(arena.router)
+app.include_router(space.router)
 
 
 @app.get("/health", tags=["health"], summary="Health check")
