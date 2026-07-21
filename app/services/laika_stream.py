@@ -16,6 +16,7 @@ from app.schemas.laika import AssistRequest, StreamAssistRequest, LaikaSource
 from app.services import studio_tree
 from app.services.laika import stream_laika_assist
 from app.services.laika_errors import laika_provider_error_message
+from app.services.learning_context import resolve_learning_context
 from app.services.rag.learner import resolve_learner_display_name
 from app.services.rag.status import laika_status_message
 
@@ -177,13 +178,19 @@ def _prepare_tree(
     if request.content.strip():
         messages.append({"role": "user", "content": request.content, "created_at": None})
 
+    learning_context = resolve_learning_context(
+        db,
+        user.id,
+        client=request.learning_context,
+    )
+
     full_request = AssistRequest(
         entry_type=row.type,
         content=request.content,
         intent=request.intent,
         entry_content=row.content,
         messages=messages,
-        learning_context=request.learning_context,
+        learning_context=learning_context,
         client_now=datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         learner_display_name=resolve_learner_display_name(user.display_name, user.email),
         web_search=request.web_search,

@@ -32,7 +32,12 @@ VALID_INTENTS: frozenset[str] = frozenset(
 
 class LearningContext(BaseModel):
     course: str | None = None
+    course_title: str | None = None
     completed_topics: list[str] = Field(default_factory=list)
+    completed_modules: list[str] = Field(default_factory=list)
+    pending_modules: list[str] = Field(default_factory=list)
+    pending_topics: list[str] = Field(default_factory=list)
+    space_progress_percent: int | None = None
     arena_missions: list[str] = Field(default_factory=list)
 
 
