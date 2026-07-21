@@ -11,7 +11,7 @@ def _user_id(db, auth_headers) -> str:
 
 
 def test_resolve_learning_context_empty(db, client, auth_headers):
-    arena_service.clear_attempts()
+    arena_service.clear_attempts(db)
     ctx = resolve_learning_context(db, _user_id(db, auth_headers))
     assert ctx.course == "cubesat-for-beginner"
     assert ctx.completed_modules == []
@@ -41,7 +41,7 @@ def test_resolve_learning_context_with_space_progress(db, client, auth_headers):
 
 
 def test_resolve_learning_context_with_arena_draft(db, client, auth_headers):
-    arena_service.clear_attempts()
+    arena_service.clear_attempts(db)
     save = client.put(
         "/arena/missions/leo-orbital-launch/attempt",
         headers=auth_headers,

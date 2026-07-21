@@ -99,7 +99,7 @@ def resolve_learning_context(
 
     arena_missions: list[str] = []
     for mission_id, title in ARENA_MISSIONS:
-        attempt = arena_service.get_attempt(user_id, mission_id)
+        attempt = arena_service.get_attempt(db, user_id, mission_id)
         if attempt is not None and attempt.ast:
             arena_missions.append(f"{title} — Blockly draft saved")
 
