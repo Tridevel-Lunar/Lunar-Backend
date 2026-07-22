@@ -1,7 +1,7 @@
 """add workspace JSON column to arena_attempts
 
 Revision ID: 011_arena_workspace
-Revises: 010_arena_mission_ver
+Revises: 011_merge_heads
 Create Date: 2026-07-22
 
 """
@@ -13,7 +13,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 revision: str = "011_arena_workspace"
-down_revision: Union[str, None] = "010_arena_mission_ver"
+down_revision: Union[str, None] = "011_merge_heads"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

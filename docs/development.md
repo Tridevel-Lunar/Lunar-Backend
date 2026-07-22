@@ -262,10 +262,10 @@ Deterministic in-process runner + attempt persistence (no Redis required for M01
 |------|------|
 | `app/api/routes/arena.py` | `GET` mission · `GET`/`PUT` attempt · `POST` runs |
 | `app/schemas/arena.py` | Pack / attempt (`ast` + `workspace`) / run DTOs |
-| `app/services/arena.py` | Attempt CRUD + AST validate + 10-tick sim + grade |
+| `app/services/arena.py` | Attempt CRUD + AST validate + per-second orbit sim + grade |
 | `app/models/arena_attempt.py` | `arena_attempts` (`ast`, nullable `workspace`, `mission_version`) |
-| `app/arena/missions/leo_orbital_launch.py` | M01 pack (version 3, world params, allowedOps) |
-| `app/arena/missions/m01_pass_solution.py` | Reference Perfect-pass AST |
+| `app/arena/missions/leo_orbit_one_lap.py` | M01 pack (`leo-orbit-one-lap` v1, eclipse world, allowedOps) |
+| `app/arena/missions/one_lap_pass_solution.py` | Reference Perfect-pass AST |
 | `alembic/versions/009_*.py` … `011_*.py` | Attempts table · mission_version · workspace column |
 | `tests/test_arena.py` | Auth, save/load (+ workspace), grading, validation 422s |
 | `scripts/seed_m01_pass_attempt.py` | Seed Perfect AST into DB for a user |

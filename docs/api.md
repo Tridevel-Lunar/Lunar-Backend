@@ -438,7 +438,7 @@ Lightweight graph for the branch map UI (user node labels + edges, no full messa
 
 Auth required (`get_current_user`). Drafts persist in PostgreSQL table `arena_attempts` (per user + mission). On pack `version` mismatch, the saved attempt is cleared.
 
-Mission 01 pack id: `leo-orbital-launch` (version **3**). Grading runs **in-process** in the API (deterministic 10-tick sim) — no Redis/RQ required for M01.
+Mission 01 pack id: `leo-orbit-one-lap` (version **1**). Grading runs **in-process** in the API (per-second LEO orbit sim, ~5550 windows) — no Redis/RQ required for M01.
 
 ### GET `/arena/missions/{mission_id}`
 
@@ -448,15 +448,20 @@ Pack metadata for the Blockly toolbox (no secrets).
 
 ```json
 {
-  "id": "leo-orbital-launch",
-  "version": 3,
-  "toolboxId": "m01-beginner",
-  "title": "FIRST ORBIT SURVIVAL",
+  "id": "leo-orbit-one-lap",
+  "version": 1,
+  "toolboxId": "obc-eps-payload",
+  "title": "ONE LAP AROUND EARTH",
   "code": "MISSION 01",
   "level": "BEGINNER",
   "playable": true,
-  "allowedOps": ["setup", "main_loop", "turn_payload", "if", "…"],
-  "limits": { "maxBlocks": 80, "maxDepth": 12, "maxSteps": 500, "wallMs": 3000 }
+  "allowedOps": ["setup", "main_loop", "is_in_sunlight", "turn_heater", "if", "when", "…"],
+  "limits": { "maxBlocks": 80, "maxDepth": 12, "maxSteps": 500000, "wallMs": 60000 },
+  "enabledLibs": ["obc", "eps", "payload"],
+  "payloadModuleId": "generic",
+  "commLibVisible": false,
+  "orbitPeriodSec": 5550,
+  "eclipseFraction": 0.35
 }
 ```
 
@@ -486,11 +491,18 @@ Save draft AST and optional Blockly workspace state.
 
 ### POST `/arena/missions/{mission_id}/runs`
 
-Run deterministic Mission 01 simulation from **program AST only**.
+Run per-second one-orbit simulation from program AST + optional setup tabs.
 
 ```json
-{ "ast": { "type": "program", "body": [/* setup + main_loop */] } }
+{
+  "ast": { "type": "program", "body": [/* setup + main_loop */] },
+  "epsSetup": { "heater_power": 30, "temp_min": 15, "temp_max": 55 },
+  "payloadSetup": { "default_on": false },
+  "commSetup": { "pass_sim_sec": 5400 }
+}
 ```
+
+Setup fields are optional; defaults come from pack `setupPresets`.
 
 **Validation (`422`)** — structural checks before sim:
 
@@ -499,21 +511,30 @@ Run deterministic Mission 01 simulation from **program AST only**.
 - `main_loop` must include at least one control op (`if`, `when`, `turn_*`, safe mode, `repeat_until_end`, …)
 - Ops limited to pack `allowedOps`; size limited by `maxBlocks` / `maxDepth`
 
-**Grading** — end-state battery/temp bands (`perfect` / `risky` / `fail`). Runs with **no effectful main-loop ops executed** are forced to `fail` (empty/`wait`-only programs cannot pass).
+**Grading** — end-of-orbit battery/temp bands (`perfect` / `risky` / `fail`) plus optional eclipse battery floor. Timing overruns are reported but do **not** fail M01 (`outcome_first`). Runs with **no effectful main-loop ops executed** are forced to `fail`.
 
 **Response `200`** (shape)
 
 ```json
 {
-  "mission_id": "leo-orbital-launch",
-  "mission_version": 3,
-  "ticks": [/* 10 TickLogEntry */],
-  "final_battery": 46,
-  "final_temperature": 58,
+  "mission_id": "leo-orbit-one-lap",
+  "mission_version": 1,
+  "orbitPeriodSec": 5550,
+  "simSecPerWindow": 1,
+  "trace": [/* OrbitTraceEntry sampled every ~30s */],
+  "orbitSummary": {
+    "eclipseEnterSec": 1804,
+    "eclipseExitSec": 3746,
+    "minBattery": 42,
+    "minBatteryDuringEclipse": 38
+  },
+  "final_battery": 68,
+  "final_temperature": 22,
+  "timing": { "overrunCount": 0, "usedSecPerWindowSample": [0.02] },
   "result": {
     "grade": "perfect",
     "comms": "full",
-    "payload_data": "full",
+    "payload_data": "partial",
     "longevity_impact": "none",
     "satellite_survived": true,
     "sent_to_earth": true
