@@ -21,6 +21,9 @@ class ArenaAttempt(Base):
     )
     mission_id: Mapped[str] = mapped_column(String(64), nullable=False)
     ast: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), "postgresql"), nullable=False)
+    workspace: Mapped[dict | None] = mapped_column(
+        JSON().with_variant(JSONB(), "postgresql"), nullable=True
+    )
     mission_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     last_result: Mapped[dict | None] = mapped_column(
         JSON().with_variant(JSONB(), "postgresql"), nullable=True

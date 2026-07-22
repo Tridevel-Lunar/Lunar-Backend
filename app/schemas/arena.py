@@ -26,10 +26,15 @@ class AttemptResponse(BaseModel):
     mission_id: str
     mission_version: int | None = None
     ast: dict[str, Any] | None = None
+    workspace: dict[str, Any] | None = None
 
 
 class SaveAttemptRequest(BaseModel):
-    ast: dict[str, Any] = Field(description="Blockly workspace JSON AST")
+    ast: dict[str, Any] = Field(description="Program AST for run/grade")
+    workspace: dict[str, Any] | None = Field(
+        default=None,
+        description="Blockly workspace serialization (layout/positions); optional for legacy clients",
+    )
 
 
 class RunMissionRequest(BaseModel):

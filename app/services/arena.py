@@ -70,17 +70,28 @@ def get_attempt(db: Session, user_id: UUID, mission_id: str) -> AttemptResponse 
     mission_version = _pack_version(pack)
     row = _get_attempt_row(db, user_id, mission_id)
     if row is None:
-        return AttemptResponse(mission_id=mission_id, mission_version=mission_version, ast=None)
+        return AttemptResponse(
+            mission_id=mission_id,
+            mission_version=mission_version,
+            ast=None,
+            workspace=None,
+        )
 
     if int(row.mission_version) != mission_version:
         db.delete(row)
         db.commit()
-        return AttemptResponse(mission_id=mission_id, mission_version=mission_version, ast=None)
+        return AttemptResponse(
+            mission_id=mission_id,
+            mission_version=mission_version,
+            ast=None,
+            workspace=None,
+        )
 
     return AttemptResponse(
         mission_id=mission_id,
         mission_version=mission_version,
         ast=row.ast,
+        workspace=row.workspace,
     )
 
 
@@ -101,6 +112,7 @@ def save_attempt(
             user_id=user_id,
             mission_id=mission_id,
             ast=payload.ast,
+            workspace=payload.workspace,
             mission_version=mission_version,
             last_result=None,
             created_at=now,
@@ -109,12 +121,18 @@ def save_attempt(
         db.add(row)
     else:
         row.ast = payload.ast
+        row.workspace = payload.workspace
         row.mission_version = mission_version
         row.updated_at = now
 
     db.commit()
     db.refresh(row)
-    return AttemptResponse(mission_id=mission_id, mission_version=mission_version, ast=row.ast)
+    return AttemptResponse(
+        mission_id=mission_id,
+        mission_version=mission_version,
+        ast=row.ast,
+        workspace=row.workspace,
+    )
 
 
 def _iter_nodes(program_ast: dict[str, Any]) -> list[tuple[dict[str, Any], int]]:

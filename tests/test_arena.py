@@ -37,6 +37,7 @@ def test_attempt_save_load_round_trip(client, auth_headers):
     empty = client.get(f"/arena/missions/{mission_id}/attempt", headers=auth_headers)
     assert empty.status_code == 200
     assert empty.json()["ast"] is None
+    assert empty.json()["workspace"] is None
     assert empty.json()["mission_version"] == 3
 
     ast = {
@@ -50,6 +51,32 @@ def test_attempt_save_load_round_trip(client, auth_headers):
             {"id": "b3", "op": "main_loop", "body": [{"id": "b4", "op": "turn_payload", "args": {"on": False}}]},
         ],
     }
+    workspace = {
+        "blocks": {
+            "languageVersion": 0,
+            "blocks": [{"type": "m01_on_start", "id": "b1", "x": 120, "y": 80}],
+        }
+    }
+    save = client.put(
+        f"/arena/missions/{mission_id}/attempt",
+        headers=auth_headers,
+        json={"ast": ast, "workspace": workspace},
+    )
+    assert save.status_code == 200
+    assert save.json()["ast"] == ast
+    assert save.json()["workspace"] == workspace
+
+    loaded = client.get(f"/arena/missions/{mission_id}/attempt", headers=auth_headers)
+    assert loaded.status_code == 200
+    assert loaded.json()["mission_id"] == mission_id
+    assert loaded.json()["mission_version"] == 3
+    assert loaded.json()["ast"] == ast
+    assert loaded.json()["workspace"] == workspace
+
+
+def test_attempt_save_without_workspace_ok(client, auth_headers):
+    mission_id = "leo-orbital-launch"
+    ast = {"type": "program", "body": [{"id": "s", "op": "setup", "body": []}]}
     save = client.put(
         f"/arena/missions/{mission_id}/attempt",
         headers=auth_headers,
@@ -57,12 +84,7 @@ def test_attempt_save_load_round_trip(client, auth_headers):
     )
     assert save.status_code == 200
     assert save.json()["ast"] == ast
-
-    loaded = client.get(f"/arena/missions/{mission_id}/attempt", headers=auth_headers)
-    assert loaded.status_code == 200
-    assert loaded.json()["mission_id"] == mission_id
-    assert loaded.json()["mission_version"] == 3
-    assert loaded.json()["ast"] == ast
+    assert save.json()["workspace"] is None
 
 
 def test_attempt_unknown_mission_404(client, auth_headers):
