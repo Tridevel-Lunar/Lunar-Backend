@@ -13,12 +13,14 @@ from app.schemas.laika import (
     ContextUsageResponse,
     ContextUsageSegment,
     LaikaHealthResponse,
+    LearningContext,
     StreamAssistRequest,
     StudioGreetingRequest,
     StudioGreetingResponse,
 )
 from app.services.laika_errors import laika_provider_error_message
 from app.services.laika_stream import iter_laika_assist_sse
+from app.services.learning_context import resolve_learning_context
 from app.services.rag.context_window import compute_context_usage
 from app.services.rag.tokens import resolve_context_window
 from app.services.studio_greeting import run_studio_greeting
@@ -60,6 +62,18 @@ def laika_health(settings: Settings = Depends(get_settings)) -> LaikaHealthRespo
     )
 
 
+@router.get(
+    "/learning-context",
+    response_model=LearningContext,
+    summary="Resolved learner progress for LAIKA",
+)
+def laika_learning_context(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> LearningContext:
+    return resolve_learning_context(db, user.id)
+
+
 @router.post(
     "/context/usage",
     response_model=ContextUsageResponse,
@@ -67,9 +81,15 @@ def laika_health(settings: Settings = Depends(get_settings)) -> LaikaHealthRespo
 )
 def laika_context_usage(
     payload: ContextUsageRequest,
-    _user: User = Depends(get_current_user),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ) -> ContextUsageResponse:
+    learning_context = resolve_learning_context(
+        db,
+        user.id,
+        client=payload.learning_context,
+    )
     usage = compute_context_usage(
         settings,
         intent=payload.intent,
@@ -77,9 +97,7 @@ def laika_context_usage(
         current_content=payload.current_content,
         draft=payload.draft,
         messages=payload.messages,
-        learning_context=(
-            payload.learning_context.model_dump() if payload.learning_context else None
-        ),
+        learning_context=learning_context.model_dump(),
         web_search=payload.web_search,
         mode=payload.mode,
     )
@@ -111,7 +129,8 @@ def laika_context_usage(
 )
 def laika_studio_greeting(
     payload: StudioGreetingRequest,
-    _user: User = Depends(get_current_user),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ) -> StudioGreetingResponse:
     if not settings.laika_llm_enabled:
@@ -120,7 +139,12 @@ def laika_studio_greeting(
             detail="LAIKA LLM is disabled — configure active LLM provider",
         )
     try:
-        return run_studio_greeting(settings, payload.learning_context)
+        learning_context = resolve_learning_context(
+            db,
+            user.id,
+            client=payload.learning_context,
+        )
+        return run_studio_greeting(settings, learning_context)
     except TimeoutError as exc:
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,

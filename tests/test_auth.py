@@ -303,3 +303,34 @@ def test_google_onetap_conflict_when_email_linked_to_other_google(
 
     assert response.status_code == 409
     assert response.json()["detail"] == "Email already linked to another account"
+
+
+def test_get_or_create_google_user_commits_missing_profile_fields(db):
+    from app.models.user import User
+    from app.services.auth import get_or_create_google_user
+
+    db.add(
+        User(
+            email="google@lunar.dev",
+            google_sub="google-sub-123",
+            hashed_password=None,
+            display_name=None,
+            picture=None,
+        )
+    )
+    db.commit()
+
+    user = get_or_create_google_user(
+        db,
+        google_sub="google-sub-123",
+        email="google@lunar.dev",
+        display_name="Google User",
+        picture="https://example.com/avatar.png",
+    )
+
+    assert user.display_name == "Google User"
+    assert user.picture == "https://example.com/avatar.png"
+
+    reloaded = db.query(User).filter(User.google_sub == "google-sub-123").one()
+    assert reloaded.display_name == "Google User"
+    assert reloaded.picture == "https://example.com/avatar.png"

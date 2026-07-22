@@ -303,7 +303,7 @@ Studio chat sends `messages` via `toLaikaHistory()` (`created_at` per node), plu
 
 ## Sources
 
-`POST /laika/assist` returns the full JSON response. `POST /laika/assist/stream` streams tokens via SSE (`event: token` / `event: done` with `sources[]`). Studio uses the stream endpoint.
+`POST /laika/assist/stream` streams tokens via SSE (`event: token` / `event: done` with `sources[]`). Studio uses this endpoint only — there is no non-streaming `/laika/assist`.
 
 Both always return `sources: []` in the final payload (may be empty). Entries are built from **retrieved chunk metadata**, deduplicated by `(source_id, page)` — not parsed from LLM text.
 
@@ -311,11 +311,11 @@ Both always return `sources: []` in the final payload (may be empty). Entries ar
 
 | Issue | Check |
 |-------|--------|
-| `503` on `/laika/assist` | `GET /laika/health` — `enabled: false`? Set API keys / Ollama URL |
+| `503` on `/laika/assist/stream` | `GET /laika/health` — `enabled: false`? Set API keys / Ollama URL |
 | Empty sources | Run ingest; verify `knowledge_chunks` has rows |
 | Ollama unreachable from Docker | Ollama running on host? `curl http://localhost:11434/api/tags` |
-| Slow responses | Local Ollama on CPU; try `gemini` or `groq` for LLM |
-| Rate limits (Gemini/Groq) | Retry; reduce ingest batch size |
+| Slow responses | Local Ollama on CPU; try `gemini` or `deepseek` for LLM |
+| Rate limits (Gemini/DeepSeek) | Retry; reduce ingest batch size |
 
 ## Security
 

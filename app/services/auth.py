@@ -69,11 +69,14 @@ def get_or_create_google_user(
 ) -> User:
     user = get_user_by_google_sub(db, google_sub)
     if user:
+        dirty = False
         if display_name and not user.display_name:
             user.display_name = display_name
+            dirty = True
         if picture and not user.picture:
             user.picture = picture
-        if (display_name and not user.display_name) or (picture and not user.picture):
+            dirty = True
+        if dirty:
             db.commit()
             db.refresh(user)
         return apply_admin_bootstrap(db, user)
