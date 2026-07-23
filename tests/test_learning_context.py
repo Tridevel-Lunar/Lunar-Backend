@@ -43,7 +43,7 @@ def test_resolve_learning_context_with_space_progress(db, client, auth_headers):
 def test_resolve_learning_context_with_arena_draft(db, client, auth_headers):
     arena_service.clear_attempts(db)
     save = client.put(
-        "/arena/missions/leo-orbital-launch/attempt",
+        "/arena/missions/leo-orbit-one-lap/attempt",
         headers=auth_headers,
         json={"ast": {"type": "Program", "body": []}},
     )

@@ -13,7 +13,7 @@ from app.db.session import SessionLocal
 from app.models.arena_attempt import ArenaAttempt
 from app.models.user import User
 
-MISSION_ID = "leo-orbital-launch"
+MISSION_ID = "leo-orbit-one-lap"
 
 
 def _resolve_user(session, email: str | None) -> User:
@@ -50,6 +50,7 @@ def seed_pass_attempt(email: str | None = None, *, overwrite: bool = True) -> No
                 user_id=user.id,
                 mission_id=MISSION_ID,
                 ast=M01_PASS_AST,
+                workspace=None,
                 mission_version=mission_version,
                 last_result=None,
                 created_at=now,
@@ -59,6 +60,8 @@ def seed_pass_attempt(email: str | None = None, *, overwrite: bool = True) -> No
             action = "created"
         elif overwrite:
             row.ast = M01_PASS_AST
+            # Clear Blockly layout so the FE restores from AST (workspace wins over ast).
+            row.workspace = None
             row.mission_version = mission_version
             row.updated_at = now
             action = "updated"

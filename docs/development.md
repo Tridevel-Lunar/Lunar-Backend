@@ -12,7 +12,7 @@ Python **FastAPI** — API server เชื่อม frontend กับ auth, �
 | หน้าที่ | รายละเอียด | สถานะ |
 |---------|------------|--------|
 | **Authentication** | register, login, logout, refresh, JWT + httpOnly cookies, Google Sign-In | ✓ |
-| **API Gateway** | รับ request จาก frontend — auth, studio, laika, **arena attempt save/load** | live (runs/sim planned) |
+| **API Gateway** | รับ request จาก frontend — auth, studio, laika, **arena attempt + runs** | ✓ |
 | **Orbital / Physics** | คำนวณสมการฟิสิกส์อวกาศ, วงโคจร, power budget | planned |
 | **Logging** | โครงสร้างข้อมูล log จากจำลอง | planned |
 | **LAIKA** | LLM (Gemini/DeepSeek/Ollama) + RAG ให้คำแนะนำผู้เรียน | ✓ |
@@ -220,6 +220,7 @@ Backend ใช้ **pytest** + FastAPI `TestClient` — unit/API tests ใช้
 | `tests/test_laika.py` | `/laika/health`, `/laika/assist/stream`, done sources[], 503 when disabled |
 | `tests/test_laika_context.py` | Context usage, history timestamps, learner name in prompt |
 | `tests/test_studio.py` | Studio collections + conversation/branch APIs |
+| `tests/test_arena.py` | Mission pack, attempt save/load (+ workspace), runs grading, AST 422s |
 | `tests/test_laika_providers.py` | Provider factory validation |
 
 ### หมายเหตุ
@@ -251,19 +252,27 @@ Backend ใช้ **pytest** + FastAPI `TestClient` — unit/API tests ใช้
 - Session: httpOnly cookies `lunar_token` + `lunar_refresh` (`credentials: "include"` บน frontend)
 - Access token หมดอายุ → frontend เรียก `POST /auth/refresh` อัตโนมัติ (ดู `frontend/src/lib/auth.ts`, `api.ts`)
 - ฟิสิกส์/วงโคจรรันฝั่ง backend; frontend แสดงผล
-- Blockly block definitions / AST: FE emits JSON AST; BE stores draft via `/arena` (in-memory this stage). Interpreter + `POST .../runs` planned — see [api.md](api.md#arena) and workspace `visual-programming-system-design v2.md`
+- Blockly: FE emits **program AST** for runs and **Blockly workspace JSON** for layout; BE persists both on `PUT /arena/.../attempt` (PostgreSQL `arena_attempts`) and grades via `POST .../runs` — see [api.md](api.md#arena)
 
-### Arena (mock stage)
+### Arena (Mission 01)
+
+Deterministic in-process runner + attempt persistence (no Redis required for M01).
 
 | Path | Role |
 |------|------|
-| `app/api/routes/arena.py` | `GET` mission · `GET`/`PUT` attempt |
-| `app/schemas/arena.py` | Pydantic DTOs |
-| `app/services/arena.py` | In-memory attempt store `(user_id, mission_id) → ast` |
-| `app/arena/missions/leo_orbital_launch.py` | M01 pack metadata |
-| `tests/test_arena.py` | Auth + save/load round-trip |
+| `app/api/routes/arena.py` | `GET` mission · `GET`/`PUT` attempt · `POST` runs |
+| `app/schemas/arena.py` | Pack / attempt (`ast` + `workspace`) / run DTOs |
+| `app/services/arena.py` | Attempt CRUD + AST validate + per-second orbit sim + grade |
+| `app/models/arena_attempt.py` | `arena_attempts` (`ast`, nullable `workspace`, `mission_version`) |
+| `app/arena/missions/leo_orbit_one_lap.py` | M01 pack (`leo-orbit-one-lap` v1, eclipse world, allowedOps) |
+| `app/arena/missions/one_lap_pass_solution.py` | Reference Perfect-pass AST |
+| `alembic/versions/009_*.py` … `011_*.py` | Attempts table · mission_version · workspace column |
+| `tests/test_arena.py` | Auth, save/load (+ workspace), grading, validation 422s |
+| `scripts/seed_m01_pass_attempt.py` | Seed Perfect AST into DB for a user |
 
-No Alembic / DB table yet — process restart clears attempts.
+**Draft fields:** `ast` = semantic program (runs); `workspace` = Blockly serialization (UI positions). Frontend prefers `workspace` on restore.
+
+**Run rules (summary):** require `setup` + `main_loop` with at least one control block; no-op / wait-only / orphan top-level blocks → `422` or forced `fail`; empty passive physics cannot earn Perfect.
 
 ## Deploy (Render — Docker)
 

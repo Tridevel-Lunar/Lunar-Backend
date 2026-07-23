@@ -26,7 +26,7 @@ COURSE_MODULES: dict[str, dict[str, object]] = {
 }
 
 ARENA_MISSIONS: list[tuple[str, str]] = [
-    ("leo-orbital-launch", "MISSION 01 — LEO Orbital Launch"),
+    ("leo-orbit-one-lap", "MISSION 01 — One Lap Around Earth"),
 ]
 
 DEFAULT_COURSE_ID = "cubesat-for-beginner"

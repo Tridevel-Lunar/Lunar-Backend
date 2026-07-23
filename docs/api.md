@@ -436,7 +436,9 @@ Lightweight graph for the branch map UI (user node labels + edges, no full messa
 
 ## Arena
 
-Auth required (`get_current_user`). Attempt AST is stored **in-memory** this stage (no DB) — lost on process restart.
+Auth required (`get_current_user`). Drafts persist in PostgreSQL table `arena_attempts` (per user + mission). On pack `version` mismatch, the saved attempt is cleared.
+
+Mission 01 pack id: `leo-orbit-one-lap` (version **1**). Grading runs **in-process** in the API (per-second LEO orbit sim, ~5550 windows) — no Redis/RQ required for M01.
 
 ### GET `/arena/missions/{mission_id}`
 
@@ -446,14 +448,20 @@ Pack metadata for the Blockly toolbox (no secrets).
 
 ```json
 {
-  "id": "leo-orbital-launch",
-  "toolboxId": "m01-beginner",
-  "title": "LEO ORBITAL LAUNCH",
+  "id": "leo-orbit-one-lap",
+  "version": 1,
+  "toolboxId": "obc-eps-payload",
+  "title": "ONE LAP AROUND EARTH",
   "code": "MISSION 01",
   "level": "BEGINNER",
   "playable": true,
-  "allowedOps": ["on_start", "power_bus_on", "…"],
-  "limits": { "maxBlocks": 40, "maxDepth": 12, "maxSteps": 500, "wallMs": 3000 }
+  "allowedOps": ["setup", "main_loop", "is_in_sunlight", "turn_heater", "if", "when", "…"],
+  "limits": { "maxBlocks": 80, "maxDepth": 12, "maxSteps": 500000, "wallMs": 60000 },
+  "enabledLibs": ["obc", "eps", "payload"],
+  "payloadModuleId": "generic",
+  "commLibVisible": false,
+  "orbitPeriodSec": 5550,
+  "eclipseFraction": 0.35
 }
 ```
 
@@ -461,14 +469,80 @@ Pack metadata for the Blockly toolbox (no secrets).
 
 ### GET `/arena/missions/{mission_id}/attempt`
 
-Load draft AST for the current user (`ast` may be `null`).
+Load draft for the current user. `ast` / `workspace` may be `null` when no attempt exists.
+
+| Field | Role |
+|-------|------|
+| `ast` | Program AST (semantic) — source of truth for `POST .../runs` |
+| `workspace` | Blockly workspace serialization (block positions / scroll) — prefer for UI restore |
 
 ### PUT `/arena/missions/{mission_id}/attempt`
 
-Save draft AST.
+Save draft AST and optional Blockly workspace state.
 
 ```json
-{ "ast": { "type": "program", "body": [] } }
+{
+  "ast": { "type": "program", "body": [] },
+  "workspace": { "blocks": { "languageVersion": 0, "blocks": [] } }
+}
 ```
 
-`POST .../runs` (simulate) is **not** implemented yet.
+`workspace` is optional (legacy clients may omit it). When present, frontend remount/reload prefers `workspace` over AST auto-layout.
+
+### POST `/arena/missions/{mission_id}/runs`
+
+Run per-second one-orbit simulation from program AST + optional setup tabs.
+
+```json
+{
+  "ast": { "type": "program", "body": [/* setup + main_loop */] },
+  "epsSetup": { "heater_power": 30, "temp_min": 15, "temp_max": 55 },
+  "payloadSetup": { "default_on": false },
+  "commSetup": { "pass_sim_sec": 5400 }
+}
+```
+
+Setup fields are optional; defaults come from pack `setupPresets`.
+
+**Validation (`422`)** — structural checks before sim:
+
+- Must include `setup` and `main_loop` containers
+- Top-level body may only contain those containers (no orphan blocks)
+- `main_loop` must include at least one control op (`if`, `when`, `turn_*`, safe mode, `repeat_until_end`, …)
+- Ops limited to pack `allowedOps`; size limited by `maxBlocks` / `maxDepth`
+
+**Grading** — end-of-orbit battery/temp bands (`perfect` / `risky` / `fail`) plus optional eclipse battery floor. Timing overruns are reported but do **not** fail M01 (`outcome_first`). Runs with **no effectful main-loop ops executed** are forced to `fail`.
+
+**Response `200`** (shape)
+
+```json
+{
+  "mission_id": "leo-orbit-one-lap",
+  "mission_version": 1,
+  "orbitPeriodSec": 5550,
+  "simSecPerWindow": 1,
+  "trace": [/* OrbitTraceEntry sampled every ~30s */],
+  "orbitSummary": {
+    "eclipseEnterSec": 1804,
+    "eclipseExitSec": 3746,
+    "minBattery": 42,
+    "minBatteryDuringEclipse": 38
+  },
+  "final_battery": 68,
+  "final_temperature": 22,
+  "timing": { "overrunCount": 0, "usedSecPerWindowSample": [0.02] },
+  "result": {
+    "grade": "perfect",
+    "comms": "full",
+    "payload_data": "partial",
+    "longevity_impact": "none",
+    "satellite_survived": true,
+    "sent_to_earth": true
+  }
+}
+```
+
+**Response `404`** — unknown mission.  
+**Response `422`** — invalid AST (detail string).
+
+Migrations: `009_arena_attempts` · `010_arena_mission_ver` · `011_arena_workspace`.
