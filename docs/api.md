@@ -434,6 +434,61 @@ Lightweight graph for the branch map UI (user node labels + edges, no full messa
 
 ---
 
+## Space
+
+Auth required (`get_current_user`). Course/module **progress** is per-user in PostgreSQL. The **catalog tree** (folders + course leaves) is file-backed at `backend/data/space/catalog.json` — source of truth for what exists in Space Technology.
+
+Only catalog courses with `status: published` are enterable in the app today (`cubesat-for-beginner`). `coming_soon` / `later` appear in the tree and LAIKA digest but are not deep-linked as available lessons.
+
+### GET `/space/catalog`
+
+Full nested catalog for the Space Explore UI.
+
+**Response `200`** — `domainId`, `title`, `titleTh`, `summary`, `nodes[]` where each node is:
+
+- `kind: "folder"` — `id`, `title`, `titleTh`, `summary`, `children[]`
+- `kind: "course"` — leaf with LAIKA metadata (`summary`, `teaches`, `intentHints`, `prerequisites`, `recommendWhen`, `doNotConfuseWith`, `arenaHooks`, optional `outline` for published multi-module courses), plus `status`: `published` | `coming_soon` | `later`
+
+**Errors:** `401` not authenticated
+
+### GET `/space/catalog/digest`
+
+Flat course list + markdown string for LAIKA / debugging (same builder as prompt injection).
+
+**Query:** `include_later` (bool, default `false`) — when false, only `published` + `coming_soon`.
+
+**Response `200`**
+
+```json
+{
+  "domainId": "space-technology",
+  "courses": [
+    {
+      "id": "cubesat-for-beginner",
+      "title": "CUBESAT FOR BEGINNER",
+      "titleTh": "พื้นฐานดาวเทียมเล็ก",
+      "status": "published",
+      "path": ["flight", "platforms", "cubesat"],
+      "pathTitles": ["FLIGHT", "PLATFORMS", "CUBESAT"],
+      "teaches": ["…"],
+      "intentHints": ["…"],
+      "outline": [{ "id": "overview", "title": "…", "summary": "…" }]
+    }
+  ],
+  "markdown": "## Space Technology catalog (authoritative)\n…"
+}
+```
+
+### GET `/space/progress`
+
+List completed Space modules for the current user.
+
+### PUT `/space/courses/{course_id}/modules/{module_id}/complete`
+
+Idempotent mark module complete (registry module ids under a published course).
+
+---
+
 ## Arena
 
 Auth required (`get_current_user`). Drafts persist in PostgreSQL table `arena_attempts` (per user + mission). On pack `version` mismatch, the saved attempt is cleared.

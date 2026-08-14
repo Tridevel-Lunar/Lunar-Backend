@@ -1,13 +1,43 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.space import SpaceModuleCompletion, SpaceProgressResponse
+from app.schemas.space_catalog import SpaceCatalogDigestResponse, SpaceCatalogResponse
 from app.services import space as space_service
+from app.services import space_catalog as space_catalog_service
 
 router = APIRouter(prefix="/space", tags=["space"])
+
+
+@router.get(
+    "/catalog",
+    response_model=SpaceCatalogResponse,
+    summary="Space Technology catalog tree (folders + course leaves)",
+)
+def get_catalog(
+    current_user: User = Depends(get_current_user),
+) -> SpaceCatalogResponse:
+    _ = current_user
+    return space_catalog_service.get_catalog_tree()
+
+
+@router.get(
+    "/catalog/digest",
+    response_model=SpaceCatalogDigestResponse,
+    summary="Flat catalog digest for LAIKA / debugging",
+)
+def get_catalog_digest(
+    current_user: User = Depends(get_current_user),
+    include_later: bool = Query(
+        False,
+        description="Include status=later courses in the digest",
+    ),
+) -> SpaceCatalogDigestResponse:
+    _ = current_user
+    return space_catalog_service.get_catalog_digest(include_later=include_later)
 
 
 @router.get(

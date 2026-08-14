@@ -293,9 +293,19 @@ Each assist call builds a **human** prompt (see `app/services/rag/context_window
 | Conversation continuity | Gap since last `created_at` in history (`session_time.py`) — welcome-back after ~3 days; active threads should not reopen with สวัสดี every turn |
 | RAG context | Retrieved chunks |
 | Learner progress | Optional `learning_context` |
+| Space catalog digest | Short markdown from `space_catalog.format_catalog_digest()` (published + coming_soon) appended under platform context |
 | Entry type + pinned entry | `entry_type`, `entry_content` |
 | History | `messages[]` with optional `[timestamp] Learner/LAIKA:` lines |
 | Current message | `content` |
+
+**Space catalog recommend-by-id rules** (encoded in prompt helper + digest header):
+
+1. Recommend **only** course ids that appear in the catalog digest — never invent courses
+2. Prefer `status: published` (enterable today); may mention `coming_soon` as “กำลังจะมี” but do not deep-link as available now
+3. Treat `later` as soft / optional unless the learner asks for that topic specifically
+4. Lunar ≠ CubeSat-only — do not force every intent through `cubesat-for-beginner`
+5. Folders are navigation only — never recommend a folder as a lesson
+6. When a published course has `outline[]`, LAIKA may point to module ids inside that course; outline items are not separate tree leaves
 
 System prompts (`prompts.py`) instruct gender-neutral mentor Thai, Markdown/LaTeX, and **natural greeting** — use the learner's name sparingly; do not greet on every reply.
 

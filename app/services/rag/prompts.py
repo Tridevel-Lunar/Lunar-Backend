@@ -51,7 +51,11 @@ Typical learner journey: **Space (learn concepts) → Arena (build mission logic
 Landing page labels map to modules: **LEARN → Space**, **BUILD → Arena**, **LAUNCH → Studio**.
 
 ### Space — Learn (`/space`)
-Interactive courses made of custom **modules**. The flagship course is **CubeSat for Beginner** (`cubesat-for-beginner`).
+Space Technology is a **folder → course** catalog (unlimited folder depth; leaves are courses).
+**CubeSat for Beginner** (`cubesat-for-beginner`) is the **pilot / published** course today — not the whole domain.
+Other courses (Earth applications, ground ops, orbits, etc.) may appear as `coming_soon` in the catalog digest appended to this context.
+
+Pilot course modules (enterable today):
 
 | Module ID | Title (EN) | What learners do today |
 |-----------|------------|--------------------------|
@@ -60,20 +64,22 @@ Interactive courses made of custom **modules**. The flagship course is **CubeSat
 | `physics` | Physics for Space | Slide + 3D sim lessons: gravity & orbit (free-fall, LEO ~7.5 km/s); **geomagnetic dipole** & L-shells; **thermal cycling** & eclipse; **Van Allen belts** & **SEU**; vacuum drag & orbital decay; one-orbit timeline sim; module quiz |
 | `programming` | Programming for CubeSat | Short eclipse/sun narrative + CTA into Arena M01 Blockly (one-orbit survival). Full practice is in Arena, not a separate Space Blockly page. |
 
-Shared Space UX: knowledge popups on `[[term|label]]` links, module completion tracking (backend `GET /space/progress`), 3D scenes with sim time controls where applicable.
+Shared Space UX: knowledge popups on `[[term|label]]` links, module completion tracking (backend `GET /space/progress`), catalog browse (`GET /space/catalog`), 3D scenes with sim time controls where applicable.
+
+**Catalog rules for recommendations:** recommend only course ids from the digest; prefer `published`; mention `coming_soon` as upcoming (not enterable); never recommend a folder; do not force every intent through `cubesat-for-beginner`.
 
 **Do not claim these Space modules exist:** separate "Embedded System" schematic lab, or standalone Space Blockly editor outside Arena.
 
-When suggesting next steps after a note, prefer concrete module IDs above (e.g. "กลับไปทบทวนใน Physics → Radiation" or "ลอง Anatomy → Data flow").
+When suggesting next steps after a note, prefer concrete published module IDs above when the learner is on the pilot track, or catalog course ids from the digest for broader Space Technology goals.
 
 ### Arena — Build & Mission Simulation (`/arena`)
-Hands-on **visual coding** after Space basics.
+Hands-on practice after Space. Arena missions can eventually map to any Space branch; the **current playable** mission is CubeSat-oriented.
 
 **Current stage:** **MISSION 01 — ONE LAP AROUND EARTH** (`leo-orbit-one-lap`). Learners configure EPS / Payload / COMM tabs, write OBC Blockly (`obc_*` / `eps_*` / `payload_*`), then `POST .../runs` runs an in-process **per-second LEO orbit simulator** (~5550 s, sun → eclipse → sun). Response includes sampled `trace[]`, `orbitSummary`, and Perfect/Risky/Fail grading. Timing budget metadata is informational only (`outcome_first`).
 
 Routes: `/arena` (mission hub) · `/arena/mission/leo-orbit-one-lap` (setup tabs + Blockly + orbit feedback).
 
-When suggesting Arena next steps, tell learners to keep the CubeSat alive for **one full orbit**, prepare heater/payload for **eclipse**, and use sunlight sensors — do **not** mention 10 ticks or glitch events.
+When suggesting Arena next steps for the pilot track, tell learners to keep the CubeSat alive for **one full orbit**, prepare heater/payload for **eclipse**, and use sunlight sensors — do **not** mention 10 ticks or glitch events.
 
 ### Studio — Launch (`/studio`)
 Portfolio and ideation space. **You (LAIKA) are the AI mentor here.**
@@ -108,6 +114,32 @@ When suggesting next steps, prefer concrete actions inside Space, Arena, or Stud
 """.strip()
 
 
+def format_space_catalog_digest_for_prompt(*, max_chars: int = 4500) -> str:
+    try:
+        from app.services.space_catalog import format_catalog_digest
+
+        return format_catalog_digest(max_chars=max_chars)
+    except Exception:
+        return (
+            "(Space catalog digest unavailable — recommend only published "
+            "`cubesat-for-beginner` modules until catalog loads.)"
+        )
+
+
+def get_lunar_platform_context() -> str:
+    """Platform blurb + authoritative Space catalog digest."""
+    return f"{LUNAR_PLATFORM_CONTEXT}\n\n{format_space_catalog_digest_for_prompt()}"
+
+
+def get_intent_system_prompt(intent: LaikaIntent) -> str:
+    """System prompt for an assist intent, including live catalog digest."""
+    base = INTENT_SYSTEM_PROMPTS[intent]
+    digest = format_space_catalog_digest_for_prompt()
+    if digest in base:
+        return base
+    return f"{base}\n\n{digest}"
+
+
 def _intent_prompt(task: str, persona: str | None = None) -> str:
     p = persona or LAIKA_PERSONA
     return f"""{p}
@@ -130,8 +162,8 @@ INTENT_SYSTEM_PROMPTS: dict[LaikaIntent, str] = {
     ),
     "next-step": _intent_prompt(
         "The learner saved a **Note** collection. Suggest 2–4 concrete next steps using real LUNAR features: "
-        "which Space module to revisit, whether to draft Arena M01 blocks, or how to extend the note in Studio (branch / new collection). "
-        "Do not send them to the programming Space module — it is not ready."
+        "which Space module to revisit (pilot course), other catalog courses by id when relevant, "
+        "whether to draft Arena M01 blocks, or how to extend the note in Studio (branch / new collection)."
     ),
     "analyze": _intent_prompt(
         "The learner saved an **Idea** collection. Analyze feasibility, constraints (power, mass, orbit, radiation, "
@@ -160,10 +192,7 @@ INTENT_SYSTEM_PROMPTS: dict[LaikaIntent, str] = {
     ),
 }
 
-STUDIO_GREETING_PROMPT = f"""{LAIKA_PERSONA}
-
-{LUNAR_PLATFORM_CONTEXT}
-
+STUDIO_GREETING_PROMPT_BODY = """
 You greet a learner on the Studio landing page (`/studio`).
 
 Write a short inspirational greeting (2–4 sentences) in polite, gender-neutral Thai (no ค่ะ/ครับ or similar particles).
@@ -174,6 +203,10 @@ Write a short inspirational greeting (2–4 sentences) in polite, gender-neutral
 - Plain text only — no Markdown headings, no bullet lists.
 - Warm, encouraging, concise.
 """.strip()
+
+
+def get_studio_greeting_prompt() -> str:
+    return f"{LAIKA_PERSONA}\n\n{get_lunar_platform_context()}\n\n{STUDIO_GREETING_PROMPT_BODY}"
 
 
 @dataclass(frozen=True)

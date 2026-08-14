@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from app.core.config import Settings
 from app.schemas.laika import AssistRequest, ChatMessage, LaikaIntent
 from app.services.rag.learner import format_learner_identity
-from app.services.rag.prompts import INTENT_SYSTEM_PROMPTS, format_learning_context
+from app.services.rag.prompts import get_intent_system_prompt, format_learning_context
 from app.services.rag.session_time import (
     format_conversation_timing_hint,
     format_datetime_bangkok,
@@ -49,7 +49,7 @@ def estimate_rag_tokens(top_k: int) -> int:
 
 
 def estimate_system_tokens(intent: LaikaIntent) -> int:
-    return estimate_tokens(INTENT_SYSTEM_PROMPTS[intent])
+    return estimate_tokens(get_intent_system_prompt(intent))
 
 
 def estimate_learning_tokens(learning_context: dict[str, object] | None) -> int:
