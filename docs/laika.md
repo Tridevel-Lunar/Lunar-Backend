@@ -147,7 +147,7 @@ backend/data/knowledge/
 | Module | Folder | ใช้กับ |
 |--------|--------|--------|
 | `space` | `space/{stage}/` | บทเรียน, อธิบายจากสิ่งที่เรียน |
-| `arena` | `arena/{stage}/` | mission brief, hints |
+| `arena` | `arena/{stage}/` | mission brief, hints — ingest per **playable** pack id (M01). Hub coming-soon ids have no corpus yet |
 | `studio` | `studio/` (flat) | อาชีพ, TRL, case study ภายนอก |
 
 เก็บใน DB หลัง sync/upload:

@@ -440,6 +440,8 @@ Auth required (`get_current_user`). Drafts persist in PostgreSQL table `arena_at
 
 Mission 01 pack id: `leo-orbit-one-lap` (version **1**). Grading runs **in-process** in the API (per-second LEO orbit sim, ~5550 windows) — no Redis/RQ required for M01.
 
+Frontend hub also lists coming-soon mission ids that are **not** packs. Those ids must **404** here until a runner exists.
+
 ### GET `/arena/missions/{mission_id}`
 
 Pack metadata for the Blockly toolbox (no secrets).
@@ -465,7 +467,7 @@ Pack metadata for the Blockly toolbox (no secrets).
 }
 ```
 
-**Response `404`** — unknown mission (e.g. `coming-soon`).
+**Response `404`** — unknown mission (frontend coming-soon ids such as `orbit-sense` are not packs).
 
 ### GET `/arena/missions/{mission_id}/attempt`
 

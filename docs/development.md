@@ -258,6 +258,8 @@ Backend ใช้ **pytest** + FastAPI `TestClient` — unit/API tests ใช้
 
 Deterministic in-process runner + attempt persistence (no Redis required for M01).
 
+**Frontend catalog (2026-08-14):** `/arena` lists six missions by Space branch. Only `leo-orbit-one-lap` has a backend pack. Other hub ids (`orbit-sense`, `ticket-to-fly`, `catch-the-pass`, `space-for-thailand`, `mission-canvas`) are coming-soon UI shells — `GET /arena/missions/{id}` returns **404** until a pack is registered. Do not add `if mission_id == ...` in `arena.py` for those shells.
+
 | Path | Role |
 |------|------|
 | `app/api/routes/arena.py` | `GET` mission · `GET`/`PUT` attempt · `POST` runs |
