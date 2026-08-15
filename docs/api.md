@@ -112,13 +112,83 @@ Returns current user. Use Swagger **Authorize** with `Bearer <token>`, or call f
   "id": "uuid",
   "email": "learner@example.com",
   "display_name": "นักเรียน LUNAR",
-  "picture": null,
+  "picture": "/api/avatars/uuid",
   "role": "learner",
-  "created_at": "2026-06-21T12:00:00Z"
+  "created_at": "2026-06-21T12:00:00Z",
+  "google_linked": false,
+  "has_password": true
 }
 ```
 
+`display_name` is Lunar-owned (never synced from Google). `picture` is a local path under `/api/avatars/{user_id}` when set.
+
 **Errors:** `401` not authenticated
+
+---
+
+### PATCH `/auth/me`
+
+Update profile fields owned by Lunar.
+
+**Request**
+
+```json
+{ "display_name": "ชื่อใน LUNAR" }
+```
+
+Pass `null` or `""` to clear `display_name`.
+
+**Response `200`:** same shape as `GET /auth/me`
+
+**Errors:** `401` not authenticated · `422` validation
+
+---
+
+### POST `/auth/me/password`
+
+Change password, or set one for Google-only accounts.
+
+**Request**
+
+```json
+{
+  "current_password": "oldpass123",
+  "new_password": "newpass456"
+}
+```
+
+- If `has_password` is true: `current_password` is required and must match.
+- If `has_password` is false: omit `current_password` to set the first password.
+
+**Response `200`:** same shape as `GET /auth/me` (`has_password` becomes `true`)
+
+**Errors:** `400` current password missing/incorrect · `401` · `422` (new password min 8 chars)
+
+---
+
+### POST `/auth/me/picture`
+
+Upload avatar (`multipart/form-data`, field `file`). Allowed: jpeg/png/webp/gif, max 2MB. Stores under `data/avatars/` and sets `picture` to `/api/avatars/{user_id}`.
+
+**Response `200`:** `UserRead`
+
+**Errors:** `400` invalid/too large · `401` not authenticated
+
+---
+
+### DELETE `/auth/me/picture`
+
+Remove local avatar file and clear `picture`.
+
+**Response `200`:** `UserRead`
+
+---
+
+### GET `/avatars/{user_id}`
+
+Public image bytes for a stored avatar (`FileResponse`). Used by the SPA via `/api/avatars/{user_id}` (Vite proxy).
+
+**Errors:** `404` no file
 
 ---
 
@@ -140,7 +210,7 @@ Browser redirect to Google OAuth. Requires `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT
 
 ### GET `/auth/google/callback`
 
-Google redirect target. Upserts user, sets session cookies, and redirects to:
+Google redirect target. Upserts user (picture downloaded locally when possible; **does not** set `display_name` from Google), sets session cookies, and redirects to:
 
 `{FRONTEND_URL}/space`
 
@@ -148,7 +218,7 @@ Google redirect target. Upserts user, sets session cookies, and redirects to:
 
 ### POST `/auth/google/onetap`
 
-Google One Tap / Sign in with Google button. Verifies a GIS credential JWT, upserts the user, and sets session cookies. Requires `GOOGLE_CLIENT_ID` in backend env (client secret not used).
+Google One Tap / Sign in with Google button. Verifies a GIS credential JWT, upserts the user, and sets session cookies. Requires `GOOGLE_CLIENT_ID` in backend env (client secret not used). Copies Google avatar to local storage when needed; never copies Google display name.
 
 **Request**
 
@@ -170,6 +240,28 @@ Google One Tap / Sign in with Google button. Verifies a GIS credential JWT, upse
 Also returns `Set-Cookie: lunar_token=...` and `Set-Cookie: lunar_refresh=...` (httpOnly).
 
 **Errors:** `401` invalid credential · `503` Google sign-in not configured
+
+---
+
+### POST `/auth/google/link`
+
+Authenticated. Attach a Google identity to the current account (GIS credential). Does not change `display_name`. May localize avatar if missing.
+
+**Request:** same as `/auth/google/onetap`
+
+**Response `200`:** `UserRead`
+
+**Errors:** `401` · `409` conflict · `503`
+
+---
+
+### POST `/auth/google/unlink`
+
+Authenticated. Clear `google_sub`. Requires `has_password` so the user can still sign in.
+
+**Response `200`:** `UserRead`
+
+**Errors:** `400` no password · `401`
 
 ---
 

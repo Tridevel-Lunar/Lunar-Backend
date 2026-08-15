@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.api.routes import arena, auth, backoffice, laika, space, studio
+from app.api.routes import arena, auth, avatars, backoffice, laika, space, studio
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -14,6 +14,7 @@ app = FastAPI(
     openapi_tags=[
         {"name": "health", "description": "Service health checks"},
         {"name": "auth", "description": "Registration, login, JWT, and Google OAuth"},
+        {"name": "avatars", "description": "Local profile avatar images"},
         {"name": "laika", "description": "LAIKA AI mentor (RAG + multi-provider LLM)"},
         {"name": "studio", "description": "Studio collections (notes, ideas, conversation trees)"},
         {"name": "arena", "description": "Arena missions (Blockly attempt save/load)"},
@@ -32,6 +33,7 @@ app.add_middleware(
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 
 app.include_router(auth.router)
+app.include_router(avatars.router)
 app.include_router(backoffice.router)
 app.include_router(laika.router)
 app.include_router(studio.router)

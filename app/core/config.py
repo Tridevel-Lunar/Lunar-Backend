@@ -60,6 +60,7 @@ class Settings(BaseSettings):
     # Comma-separated emails auto-promoted to admin on register/login (bootstrap)
     admin_emails: str = ""
     knowledge_max_upload_bytes: int = 10 * 1024 * 1024
+    avatars_dir: str = "data/avatars"
 
     @field_validator("laika_llm_provider", mode="before")
     @classmethod

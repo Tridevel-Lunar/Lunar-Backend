@@ -253,7 +253,8 @@ def test_google_onetap_success_creates_user(client, google_client_id, google_tok
     me = client.get("/auth/me")
     assert me.status_code == 200
     assert me.json()["email"] == "google@lunar.dev"
-    assert me.json()["display_name"] == "Google User"
+    assert me.json()["display_name"] is None
+    assert me.json()["google_linked"] is True
 
 
 def test_google_onetap_links_existing_email_account(
@@ -305,9 +306,36 @@ def test_google_onetap_conflict_when_email_linked_to_other_google(
     assert response.json()["detail"] == "Email already linked to another account"
 
 
-def test_get_or_create_google_user_commits_missing_profile_fields(db):
+def test_get_or_create_google_user_localizes_picture_without_name(db, tmp_path, monkeypatch):
     from app.models.user import User
+    from app.services import avatars as avatars_mod
     from app.services.auth import get_or_create_google_user
+
+    monkeypatch.setattr(avatars_mod, "avatars_dir", lambda: tmp_path)
+
+    class FakeResponse:
+        status_code = 200
+        headers = {"content-type": "image/png"}
+        content = b"\x89PNG\r\n\x1a\n" + b"\x00" * 32
+
+        def raise_for_status(self) -> None:
+            return None
+
+    class FakeClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def get(self, url: str):
+            assert url.startswith("https://")
+            return FakeResponse()
+
+    monkeypatch.setattr(avatars_mod.httpx, "Client", FakeClient)
 
     db.add(
         User(
@@ -324,13 +352,140 @@ def test_get_or_create_google_user_commits_missing_profile_fields(db):
         db,
         google_sub="google-sub-123",
         email="google@lunar.dev",
-        display_name="Google User",
         picture="https://example.com/avatar.png",
     )
 
-    assert user.display_name == "Google User"
-    assert user.picture == "https://example.com/avatar.png"
+    assert user.display_name is None
+    assert user.picture == f"/api/avatars/{user.id}"
+    assert (tmp_path / f"{user.id}.png").is_file()
 
     reloaded = db.query(User).filter(User.google_sub == "google-sub-123").one()
-    assert reloaded.display_name == "Google User"
-    assert reloaded.picture == "https://example.com/avatar.png"
+    assert reloaded.display_name is None
+    assert reloaded.picture == f"/api/avatars/{user.id}"
+
+
+def test_patch_me_updates_display_name(client, auth_headers):
+    response = client.patch(
+        "/auth/me",
+        headers=auth_headers,
+        json={"display_name": "New Lunar Name"},
+    )
+    assert response.status_code == 200
+    assert response.json()["display_name"] == "New Lunar Name"
+    assert response.json()["has_password"] is True
+    assert response.json()["google_linked"] is False
+
+
+def test_change_password(client, auth_headers):
+    bad = client.post(
+        "/auth/me/password",
+        headers=auth_headers,
+        json={"current_password": "wrong-pass", "new_password": "newpass456"},
+    )
+    assert bad.status_code == 400
+
+    missing = client.post(
+        "/auth/me/password",
+        headers=auth_headers,
+        json={"new_password": "newpass456"},
+    )
+    assert missing.status_code == 400
+
+    ok = client.post(
+        "/auth/me/password",
+        headers=auth_headers,
+        json={"current_password": "testpass123", "new_password": "newpass456"},
+    )
+    assert ok.status_code == 200
+    assert ok.json()["has_password"] is True
+
+    login = client.post(
+        "/auth/login",
+        json={"email": "pytest@lunar.dev", "password": "newpass456"},
+    )
+    assert login.status_code == 200
+
+
+def test_set_password_for_google_only_user(client, db):
+    from app.models.user import User
+    from app.services.auth import issue_token_for_user
+
+    google_only = User(
+        email="setpass@lunar.dev",
+        google_sub="google-set-pass",
+        hashed_password=None,
+    )
+    db.add(google_only)
+    db.commit()
+    token = issue_token_for_user(google_only)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = client.post(
+        "/auth/me/password",
+        headers=headers,
+        json={"new_password": "firstpass1"},
+    )
+    assert response.status_code == 200
+    assert response.json()["has_password"] is True
+
+    login = client.post(
+        "/auth/login",
+        json={"email": "setpass@lunar.dev", "password": "firstpass1"},
+    )
+    assert login.status_code == 200
+
+
+def test_upload_and_delete_picture(client, auth_headers, tmp_path, monkeypatch):
+    from app.services import avatars as avatars_mod
+
+    monkeypatch.setattr(avatars_mod, "avatars_dir", lambda: tmp_path)
+
+    png = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
+    response = client.post(
+        "/auth/me/picture",
+        headers=auth_headers,
+        files={"file": ("avatar.png", png, "image/png")},
+    )
+    assert response.status_code == 200
+    picture = response.json()["picture"]
+    assert picture.startswith("/api/avatars/")
+    user_id = picture.rsplit("/", 1)[-1]
+    assert (tmp_path / f"{user_id}.png").is_file()
+
+    get_img = client.get(f"/avatars/{user_id}")
+    assert get_img.status_code == 200
+    assert get_img.content.startswith(b"\x89PNG")
+
+    deleted = client.delete("/auth/me/picture", headers=auth_headers)
+    assert deleted.status_code == 200
+    assert deleted.json()["picture"] is None
+    assert client.get(f"/avatars/{user_id}").status_code == 404
+
+
+def test_unlink_google_requires_password(client, db, auth_headers):
+    from app.models.user import User
+    from app.services.auth import get_user_by_email
+
+    user = get_user_by_email(db, "pytest@lunar.dev")
+    assert user is not None
+    user.google_sub = "google-sub-pytest"
+    db.commit()
+
+    # has password from register — unlink ok
+    response = client.post("/auth/google/unlink", headers=auth_headers)
+    assert response.status_code == 200
+    assert response.json()["google_linked"] is False
+
+    # google-only user cannot unlink
+    google_only = User(
+        email="googleonly@lunar.dev",
+        google_sub="google-only-sub",
+        hashed_password=None,
+    )
+    db.add(google_only)
+    db.commit()
+    from app.services.auth import issue_token_for_user
+
+    token = issue_token_for_user(google_only)
+    bad = client.post("/auth/google/unlink", headers={"Authorization": f"Bearer {token}"})
+    assert bad.status_code == 400

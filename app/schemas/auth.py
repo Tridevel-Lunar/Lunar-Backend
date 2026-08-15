@@ -20,6 +20,15 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
+class UpdateMeRequest(BaseModel):
+    display_name: str | None = Field(default=None, max_length=255)
+
+
+class ChangePasswordRequest(BaseModel):
+    new_password: str = Field(min_length=8, max_length=128)
+    current_password: str | None = Field(default=None, min_length=1, max_length=128)
+
+
 class UserRead(BaseModel):
     id: UUID
     email: EmailStr
@@ -27,6 +36,8 @@ class UserRead(BaseModel):
     picture: str | None = None
     role: str
     created_at: datetime
+    google_linked: bool = False
+    has_password: bool = False
 
     model_config = {"from_attributes": True}
 

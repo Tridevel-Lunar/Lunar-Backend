@@ -1,5 +1,5 @@
 from authlib.integrations.starlette_client import OAuth
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -9,19 +9,29 @@ from app.core.cookies import clear_auth_cookies, set_auth_cookie, set_refresh_co
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import (
+    ChangePasswordRequest,
     ErrorResponse,
     GoogleOneTapRequest,
     LoginRequest,
     RegisterRequest,
     TokenResponse,
+    UpdateMeRequest,
     UserRead,
 )
 from app.services.auth import (
     authenticate_user,
+    change_password,
+    delete_my_picture,
     get_or_create_google_user,
     issue_token_for_user,
+    link_google_account,
     register_user,
+    unlink_google_account,
+    update_me,
+    update_my_picture,
+    user_to_read,
 )
+from app.services.avatars import MAX_AVATAR_BYTES
 from app.services.google_auth import GoogleAuthError, verify_google_id_token
 from app.services.refresh_token import create_refresh_token, revoke_refresh_token, rotate_refresh_token
 
@@ -132,8 +142,147 @@ def logout(request: Request, db: Session = Depends(get_db)) -> JSONResponse:
     description="Return the authenticated user. Requires Bearer JWT or session cookie.",
     responses={401: {"model": ErrorResponse, "description": "Not authenticated"}},
 )
-def me(current_user: User = Depends(get_current_user)) -> User:
-    return current_user
+def me(current_user: User = Depends(get_current_user)) -> UserRead:
+    return user_to_read(current_user)
+
+
+@router.patch(
+    "/me",
+    response_model=UserRead,
+    summary="Update current user profile",
+    description="Update Lunar display_name only. Never syncs name from Google.",
+    responses={401: {"model": ErrorResponse, "description": "Not authenticated"}},
+)
+def patch_me(
+    payload: UpdateMeRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> UserRead:
+    user = update_me(db, current_user, payload)
+    return user_to_read(user)
+
+
+@router.post(
+    "/me/password",
+    response_model=UserRead,
+    summary="Change or set password",
+    description=(
+        "If the account already has a password, current_password is required. "
+        "Google-only accounts can set a password without current_password."
+    ),
+    responses={
+        400: {"model": ErrorResponse, "description": "Invalid current password"},
+        401: {"model": ErrorResponse, "description": "Not authenticated"},
+        422: {"description": "Validation error"},
+    },
+)
+def post_me_password(
+    payload: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> UserRead:
+    user = change_password(db, current_user, payload)
+    return user_to_read(user)
+
+
+@router.post(
+    "/me/picture",
+    response_model=UserRead,
+    summary="Upload profile picture",
+    description="Upload a local avatar image (jpeg/png/webp/gif, max 2MB).",
+    responses={
+        400: {"model": ErrorResponse, "description": "Invalid image"},
+        401: {"model": ErrorResponse, "description": "Not authenticated"},
+    },
+)
+async def post_me_picture(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    file: UploadFile = File(...),
+) -> UserRead:
+    data = await file.read(MAX_AVATAR_BYTES + 1)
+    if len(data) > MAX_AVATAR_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Image too large (max 2MB)",
+        )
+    user = update_my_picture(db, current_user, data, file.content_type)
+    return user_to_read(user)
+
+
+@router.delete(
+    "/me/picture",
+    response_model=UserRead,
+    summary="Delete profile picture",
+    responses={401: {"model": ErrorResponse, "description": "Not authenticated"}},
+)
+def delete_me_picture(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> UserRead:
+    user = delete_my_picture(db, current_user)
+    return user_to_read(user)
+
+
+@router.post(
+    "/google/link",
+    response_model=UserRead,
+    summary="Link Google to current account",
+    description=(
+        "Verify a GIS credential and attach google_sub to the logged-in user. "
+        "Does not change display_name. May copy avatar locally if missing."
+    ),
+    responses={
+        401: {"model": ErrorResponse, "description": "Invalid Google credential"},
+        409: {"model": ErrorResponse, "description": "Conflict"},
+        503: {"model": ErrorResponse, "description": "Google sign-in not configured"},
+    },
+)
+def google_link(
+    payload: GoogleOneTapRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> UserRead:
+    settings = get_settings()
+    if not settings.google_onetap_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google sign-in is not configured",
+        )
+    try:
+        token_payload = verify_google_id_token(payload.credential)
+    except GoogleAuthError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(exc),
+        ) from exc
+
+    user = link_google_account(
+        db,
+        current_user,
+        google_sub=token_payload["sub"],
+        email=token_payload["email"],
+        picture=token_payload.get("picture"),
+    )
+    return user_to_read(user)
+
+
+@router.post(
+    "/google/unlink",
+    response_model=UserRead,
+    summary="Unlink Google from current account",
+    description="Requires a password on the account so the user can still sign in.",
+    responses={
+        400: {"model": ErrorResponse, "description": "Cannot unlink"},
+        401: {"model": ErrorResponse, "description": "Not authenticated"},
+    },
+)
+def google_unlink(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> UserRead:
+    user = unlink_google_account(db, current_user)
+    return user_to_read(user)
 
 
 @router.get(
@@ -202,7 +351,6 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         db,
         google_sub=google_sub,
         email=email,
-        display_name=userinfo.get("name"),
         picture=userinfo.get("picture"),
     )
     access_token = issue_token_for_user(user)
@@ -220,7 +368,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     summary="Sign in with Google One Tap",
     description=(
         "Verify a Google Identity Services credential JWT, upsert the user, "
-        "and set the session cookie."
+        "and set the session cookie. Does not copy Google display name."
     ),
     responses={
         401: {"model": ErrorResponse, "description": "Invalid Google credential"},
@@ -247,7 +395,6 @@ def google_onetap(payload: GoogleOneTapRequest, db: Session = Depends(get_db)) -
         db,
         google_sub=token_payload["sub"],
         email=token_payload["email"],
-        display_name=token_payload.get("name"),
         picture=token_payload.get("picture"),
     )
     return _token_response_with_cookie(user, db, status.HTTP_200_OK)

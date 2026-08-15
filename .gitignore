@@ -34,3 +34,5 @@ Thumbs.db
 *.db
 *.sqlite3
 logs/
+data/avatars/*
+!data/avatars/.gitkeep
