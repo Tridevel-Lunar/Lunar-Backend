@@ -67,6 +67,10 @@ Refresh token เก็บในตาราง `refresh_tokens` — rotate ท�
 - `POST /auth/refresh` — แลก refresh cookie เป็น access ใหม่ + rotate refresh
 - `POST /auth/logout` — revoke refresh token, ลบ cookies ทั้งคู่
 - `GET /auth/me` — ต้องมี Bearer token หรือ cookie `lunar_token`
+- `PATCH /auth/me` — อัปเดต `display_name` (Lunar-owned)
+- `POST /auth/me/password` — เปลี่ยนรหัส (ต้องมี current) หรือตั้งรหัสครั้งแรก
+- `POST` / `DELETE /auth/me/picture` — อัปโหลด/ลบ avatar บนดิสก์
+- `POST /auth/google/link` · `POST /auth/google/unlink` — ผูก/ถอด Google (unlink ต้องมีรหัสผ่าน)
 
 ### Google Sign-In
 
@@ -82,11 +86,20 @@ One Tap flow:
 ```
 Frontend credential JWT
   → verify_google_id_token()  (google-auth, audience = GOOGLE_CLIENT_ID)
-  → get_or_create_google_user()  (link by google_sub or email)
+  → get_or_create_google_user()  (link by google_sub or email; picture only — no display_name from Google)
+  → download avatar to data/avatars/ when possible
   → Set-Cookie lunar_token + lunar_refresh
 ```
 
 Redirect callback ตรวจ `email_verified` เช่นเดียวกับ One Tap
+
+### Avatars
+
+- ไฟล์: `data/avatars/{user_id}.{ext}` (gitignore ยกเว้น `.gitkeep`)
+- Public path ใน DB: `/api/avatars/{user_id}` · serve ด้วย `GET /avatars/{user_id}`
+- FE เรียกผ่าน Vite proxy `/api` → backend
+
+Contract เต็ม: [api.md](api.md#auth)
 
 ### Account linking
 
@@ -216,7 +229,7 @@ Backend ใช้ **pytest** + FastAPI `TestClient` — unit/API tests ใช้
 | `tests/conftest.py` | SQLite DB, `client`, `auth_headers`, `google_client_id`, `google_token_payload` |
 | `tests/test_health.py` | `GET /health` |
 | `tests/test_security.py` | password hash/verify, JWT create/decode |
-| `tests/test_auth.py` | register, login, cookies, refresh rotation, `/auth/me`, logout, Google One Tap (mocked), 401/409/503 |
+| `tests/test_auth.py` | register, login, cookies, refresh, `/auth/me`, picture, password, Google link/unlink, logout, One Tap (mocked) |
 | `tests/test_laika.py` | `/laika/health`, `/laika/assist/stream`, done sources[], 503 when disabled |
 | `tests/test_laika_context.py` | Context usage, history timestamps, learner name in prompt |
 | `tests/test_studio.py` | Studio collections + conversation/branch APIs |
