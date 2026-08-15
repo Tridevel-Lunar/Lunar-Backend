@@ -307,6 +307,8 @@ Each assist call builds a **human** prompt (see `app/services/rag/context_window
 5. Folders are navigation only — never recommend a folder as a lesson
 6. When a published course has `outline[]`, LAIKA may point to module ids inside that course; outline items are not separate tree leaves
 
+**Studio assist** uses the same platform context + digest. Intent prompts (`explain`, `next-step`, ideas, Learn) should match the learner’s topic across Space Technology — CubeSat pilot / Arena M01 only when that track fits, not as the default answer frame.
+
 ### Space path mode (not Studio)
 
 `POST /space/laika/path/stream` is a separate session: flowing Thai chat + a live course map (DAG, pan/zoom). RAG is off. The model may append a ```path JSON fence (`steps` plus optional `edges`); the API strips it from `token` events and emits sanitized `plan_delta` / `plan`. Recommend-by-id rules above still apply. Opening copy is shown in the UI; skip persists as `status: skipped` without calling the LLM.
