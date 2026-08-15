@@ -31,7 +31,7 @@ class PathProposal(BaseModel):
 
 
 class LearningPathResponse(BaseModel):
-    status: Literal["none", "skipped", "active"]
+    status: Literal["none", "skipped", "active", "draft"]
     intentText: str | None = None
     intentTags: list[str] = Field(default_factory=list)
     steps: list[PathStep] = Field(default_factory=list)
@@ -43,7 +43,7 @@ class LearningPathResponse(BaseModel):
 
 
 class LearningPathWrite(BaseModel):
-    status: Literal["skipped", "active"]
+    status: Literal["skipped", "active", "draft"]
     intentText: str | None = Field(default=None, max_length=8000)
     intentTags: list[str] = Field(default_factory=list)
     steps: list[PathStep] = Field(default_factory=list)

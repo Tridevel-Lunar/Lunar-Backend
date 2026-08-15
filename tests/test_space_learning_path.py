@@ -263,3 +263,82 @@ def test_path_stream_emits_sanitized_plan_delta(
     assert saved.json()["edges"] == [
         {"from": "space-in-plain-sight", "to": "space-for-thailand"},
     ]
+    transcript = saved.json()["chatTranscript"]
+    assert len(transcript) >= 2
+    assert transcript[0]["role"] == "user"
+    assert transcript[-1]["role"] == "assistant"
+    assert "ลองเส้นนี้ก่อนนะ" in transcript[-1]["content"]
+
+
+def test_learning_path_put_draft_transcript(
+    client: TestClient, auth_headers: dict[str, str]
+) -> None:
+    res = client.put(
+        "/space/learning-path",
+        headers=auth_headers,
+        json={
+            "status": "draft",
+            "chatTranscript": [
+                {"role": "assistant", "content": "สวัสดี"},
+                {"role": "user", "content": "อยากเริ่มจากไหนดี"},
+                {"role": "assistant", "content": "ลองบอกเป้าหมายก่อนนะ"},
+            ],
+        },
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "draft"
+    assert data["steps"] == []
+    assert len(data["chatTranscript"]) == 3
+    assert data["chatTranscript"][1]["content"] == "อยากเริ่มจากไหนดี"
+
+    again = client.get("/space/learning-path", headers=auth_headers)
+    assert again.json()["status"] == "draft"
+    assert again.json()["chatTranscript"][-1]["content"] == "ลองบอกเป้าหมายก่อนนะ"
+
+
+@patch("app.services.space_learning_path.get_llm")
+def test_path_stream_persists_draft_when_not_final(
+    mock_get_llm: MagicMock,
+    client: TestClient,
+    auth_headers: dict[str, str],
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    from app.core.config import get_settings
+
+    get_settings.cache_clear()
+
+    spoken = "เล่าเป้าหมายให้อีกนิดได้ไหม "
+    fence = (
+        "```path\n"
+        '{"intentTags":["why-space"],"steps":[{"courseId":"space-in-plain-sight"}],'
+        '"final":false}\n'
+        "```"
+    )
+    full = spoken + fence
+
+    class FakeLlm:
+        def stream(self, _messages):
+            yield AIMessageChunk(content=full)
+
+    mock_get_llm.return_value = FakeLlm()
+
+    with client.stream(
+        "POST",
+        "/space/laika/path/stream",
+        headers=auth_headers,
+        json={"content": "ยังไม่แน่ใจ", "messages": []},
+    ) as response:
+        assert response.status_code == 200
+        body = "".join(response.iter_text())
+
+    assert "event: done" in body
+
+    saved = client.get("/space/learning-path", headers=auth_headers)
+    data = saved.json()
+    assert data["status"] == "draft"
+    assert data["steps"] == []
+    assert data["chatTranscript"][0] == {"role": "user", "content": "ยังไม่แน่ใจ"}
+    assert data["chatTranscript"][-1]["role"] == "assistant"
+    assert "เล่าเป้าหมาย" in data["chatTranscript"][-1]["content"]

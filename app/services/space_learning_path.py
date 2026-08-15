@@ -158,16 +158,27 @@ def _row_to_response(row: SpaceLearningPath | None) -> LearningPathResponse:
     ids = {s.courseId for s in steps}
     edges = sanitize_edges(row.edges or [], ids)
     transcript = [PathChatMessage.model_validate(m) for m in (row.chat_transcript or [])]
-    return LearningPathResponse(
-        status="active",
-        intentText=row.intent_text,
-        intentTags=list(row.intent_tags or []),
-        steps=steps,
-        edges=edges,
-        chatTranscript=transcript,
-        generatedBy="laika",
-        updatedAt=row.updated_at,
-    )
+    if steps:
+        return LearningPathResponse(
+            status="active",
+            intentText=row.intent_text,
+            intentTags=list(row.intent_tags or []),
+            steps=steps,
+            edges=edges,
+            chatTranscript=transcript,
+            generatedBy="laika",
+            updatedAt=row.updated_at,
+        )
+    if transcript:
+        return LearningPathResponse(
+            status="draft",
+            intentText=row.intent_text,
+            intentTags=list(row.intent_tags or []),
+            chatTranscript=transcript,
+            generatedBy="laika",
+            updatedAt=row.updated_at,
+        )
+    return LearningPathResponse(status="none", updatedAt=row.updated_at)
 
 
 def get_path(db: Session, user_id: UUID) -> LearningPathResponse:
@@ -207,6 +218,14 @@ def upsert_path(db: Session, user_id: UUID, payload: LearningPathWrite) -> Learn
         db.refresh(row)
         return _row_to_response(row)
 
+    if payload.status == "draft":
+        row.generated_by = "laika"
+        row.skipped_at = None
+        row.chat_transcript = [m.model_dump() for m in payload.chatTranscript]
+        db.commit()
+        db.refresh(row)
+        return _row_to_response(row)
+
     steps = sanitize_steps(payload.steps)
     if not steps:
         raise HTTPException(
@@ -235,24 +254,26 @@ def delete_path(db: Session, user_id: UUID) -> None:
     db.commit()
 
 
-def _save_final_plan(
+def _persist_chat_turn(
     db: Session,
     user_id: UUID,
-    proposal: PathProposal,
-    intent_text: str | None,
     transcript: list[PathChatMessage],
+    proposal: PathProposal | None,
 ) -> None:
-    if not proposal.steps:
+    """Save chat after each LAIKA turn so the learner can resume the session."""
+    if not transcript:
         return
     row = _get_or_create_row(db, user_id)
     row.generated_by = "laika"
     row.skipped_at = None
-    row.intent_text = intent_text
-    row.intent_tags = proposal.intentTags
-    row.steps = [s.model_dump() for s in proposal.steps]
-    row.edges = [e.model_dump(by_alias=True) for e in proposal.edges]
     row.chat_transcript = [m.model_dump() for m in transcript]
     row.updated_at = datetime.now(UTC)
+    if proposal and proposal.final and proposal.steps:
+        intent = next((m.content for m in reversed(transcript) if m.role == "user"), None)
+        row.intent_text = intent
+        row.intent_tags = proposal.intentTags
+        row.steps = [s.model_dump() for s in proposal.steps]
+        row.edges = [e.model_dump(by_alias=True) for e in proposal.edges]
     db.commit()
 
 
@@ -318,12 +339,11 @@ def iter_path_stream_sse(
             "plan" if proposal.final else "plan_delta",
             proposal_event_payload(proposal),
         )
-        if proposal.final:
-            intent = next((m.content for m in reversed(history) if m.role == "user"), None)
-            transcript = list(history)
-            if visible:
-                transcript.append(PathChatMessage(role="assistant", content=visible))
-            _save_final_plan(db, user_id, proposal, intent, transcript)
+
+    if not cancel.is_set() and visible:
+        transcript = list(history)
+        transcript.append(PathChatMessage(role="assistant", content=visible))
+        _persist_chat_turn(db, user_id, transcript, last_proposal)
 
     yield format_sse(
         "done",

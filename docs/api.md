@@ -493,17 +493,20 @@ Current learning path for the user.
 
 **Response `200`**
 
-- `status: "none"` — never planned or skipped (first visit)
+- `status: "none"` — never planned (or cleared)
 - `status: "skipped"` — learner chose to browse the catalog themselves
+- `status: "draft"` — in-progress LAIKA session: `chatTranscript` only (no saved steps yet). Resume at `/space/path/session`.
 - `status: "active"` — saved path: `intentText`, `intentTags`, `steps[]` (`courseId`, optional `note`), optional `edges[]` (`from`, `to` course ids; DAG, not a forced sequence), `chatTranscript`
 
 ### PUT `/space/learning-path`
 
-Save an active path or mark skipped.
+Save an active path, persist a draft transcript, or mark skipped.
 
-**Body:** `{ "status": "skipped" | "active", "intentText"?, "intentTags"?, "steps"?, "edges"?, "chatTranscript"? }`
+**Body:** `{ "status": "skipped" | "active" | "draft", "intentText"?, "intentTags"?, "steps"?, "edges"?, "chatTranscript"? }`
 
-Unknown `courseId` values are stripped. Active paths with no remaining catalog ids return `400`.
+- `draft` — updates `chatTranscript` only (keeps existing steps if any)
+- `active` — requires at least one known catalog `courseId` after sanitize; unknown ids are stripped (`400` if none remain)
+- `skipped` — clears steps/edges; optional transcript
 
 ### DELETE `/space/learning-path`
 
@@ -517,7 +520,7 @@ Multi-turn Space path chat (SSE). No RAG. Auth required. LLM must be enabled (`l
 
 **Events:** `status`, `token` (spoken text only), `plan_delta` / `plan` (sanitized `{ intentTags, steps, edges, final }`), `done`, `error`.
 
-Server strips unknown course ids from every plan payload. `plan` with `final: true` is auto-saved.
+Server strips unknown course ids from every plan payload. After each successful turn, the server persists `chatTranscript`. When `plan` has `final: true`, steps/edges are also saved (`status: "active"`). Non-final turns leave `status: "draft"` until the learner saves or a final plan arrives.
 
 ---
 
