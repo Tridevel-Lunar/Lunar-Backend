@@ -251,32 +251,28 @@ class RagChain:
                     messages.append(ToolMessage(content=result_text, tool_call_id=tc["id"]))
                 continue
 
-            messages.append(response)
+            # Final turn: use the invoke result. Do not append AIMessage then stream
+            # again — that ends the payload on a model turn (prefilling), which
+            # Gemini models like gemini-3.5-flash-lite reject.
             yield ("status", "generating")
+            text = _chunk_text(response.content).strip()
+            if text:
+                yield ("token", text)
             finish_reason = None
-            full_response = ""
-            for chunk in self._llm_with_tools.stream(messages):
-                if _is_cancelled(cancel_event):
-                    return
-                if isinstance(chunk, AIMessageChunk):
-                    reason = _extract_finish_reason(chunk)
-                    if reason:
-                        finish_reason = reason
-                    piece = _chunk_text(chunk.content)
-                    if piece:
-                        full_response += piece
-                        yield ("token", piece)
-
-            if not full_response:
-                final = _chunk_text(response.content)
-                if final:
-                    full_response = final
-                    yield ("token", final)
-
-            yield ("done", {
-                "sources": all_sources, "response": full_response.strip(),
-                "finish_reason": finish_reason, "truncated": finish_reason == "length",
-            })
+            meta = getattr(response, "response_metadata", None) or {}
+            if isinstance(meta, dict):
+                raw = meta.get("done_reason") or meta.get("finish_reason")
+                if raw is not None:
+                    finish_reason = str(raw)
+            yield (
+                "done",
+                {
+                    "sources": all_sources,
+                    "response": text,
+                    "finish_reason": finish_reason,
+                    "truncated": finish_reason == "length",
+                },
+            )
             return
 
         if _is_cancelled(cancel_event):
@@ -286,9 +282,3 @@ class RagChain:
         text = _chunk_text(final.content)
         yield ("token", text)
         yield ("done", {"sources": all_sources, "response": text.strip(), "finish_reason": None, "truncated": False})
-
-
-def _extract_finish_reason(chunk: object) -> str | None:
-    """Extract finish reason from an LLM chunk if available."""
-    meta = getattr(chunk, "response_metadata", None) or {}
-    return meta.get("done_reason") if isinstance(meta, dict) else None
