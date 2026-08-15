@@ -76,7 +76,9 @@
                 "อวกาศเป็นโครงสร้างพื้นฐาน",
                 "GPS มาจากไหน"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "space-in-plain-sight"
+              ],
               "relatedCourseIds": [
                 "find-your-signal",
                 "link-from-space",
@@ -110,7 +112,9 @@
                 "เศรษฐกิจอวกาศ",
                 "ใครทำเงินจากดาวเทียม"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "space-as-infrastructure"
+              ],
               "relatedCourseIds": [],
               "recommendWhen": [
                 "career",
@@ -141,7 +145,9 @@
                 "อวกาศไทย",
                 "ไทยมีดาวเทียมไหม"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "space-in-plain-sight"
+              ],
               "relatedCourseIds": [
                 "space-for-thailand",
                 "cubesat-for-beginner"
@@ -184,7 +190,9 @@
                 "วงโคจรคืออะไร",
                 "LEO ต่างจาก GEO ยังไง"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "space-in-plain-sight"
+              ],
               "relatedCourseIds": [
                 "low-earth",
                 "high-and-parked"
@@ -255,7 +263,9 @@
                 "GEO คืออะไร",
                 "ทำไมทีวีจากดาวเทียม"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "orbit-sense"
+              ],
               "relatedCourseIds": [],
               "recommendWhen": [
                 "orbits",
@@ -288,7 +298,9 @@
                 "หน้าต่างผ่าน",
                 "ทำไมคุยกับดาวเทียมไม่ได้ทั้งวัน"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "orbit-sense"
+              ],
               "relatedCourseIds": [
                 "catch-the-pass",
                 "the-ground-station"
@@ -321,7 +333,9 @@
                 "กลุ่มดาวเทียม",
                 "ทำไม GPS ต้องหลายดวง"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "orbit-sense"
+              ],
               "relatedCourseIds": [
                 "constellations",
                 "find-your-signal"
@@ -364,7 +378,9 @@
                 "อวกาศอันตรายยังไง",
                 "ทำไมต้องทนสุญญากาศ"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "orbit-sense"
+              ],
               "relatedCourseIds": [
                 "heat-and-shadow",
                 "radiation-hit"
@@ -398,7 +414,9 @@
                 "eclipse หนาวไหม",
                 "ทำไมต้องมีฮีตเตอร์"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "harsh-space"
+              ],
               "relatedCourseIds": [
                 "power-on-orbit",
                 "cubesat-for-beginner"
@@ -432,7 +450,9 @@
                 "Van Allen",
                 "SEU คืออะไร"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "harsh-space"
+              ],
               "relatedCourseIds": [],
               "recommendWhen": [
                 "environment",
@@ -463,7 +483,9 @@
                 "ขยะอวกาศ",
                 "ดาวเทียมชนกัน"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "orbit-sense"
+              ],
               "relatedCourseIds": [],
               "recommendWhen": [
                 "environment",
@@ -797,7 +819,9 @@
                     "อยากเรียนประกอบดาวเทียม",
                     "อยากเขียนโปรแกรมสั่งดาวเทียม"
                   ],
-                  "prerequisites": [],
+                  "prerequisites": [
+                    "orbit-sense"
+                  ],
                   "relatedCourseIds": [
                     "orbit-sense",
                     "the-point-of-flying"
@@ -857,7 +881,9 @@
                     "1U คืออะไร",
                     "ทำไม 10 ซม."
                   ],
-                  "prerequisites": [],
+                  "prerequisites": [
+                    "cubesat-for-beginner"
+                  ],
                   "relatedCourseIds": [],
                   "recommendWhen": [
                     "cubesat"
@@ -884,7 +910,9 @@
                   "intentHints": [
                     "CubeSat จริงมีอะไรบ้าง"
                   ],
-                  "prerequisites": [],
+                  "prerequisites": [
+                    "cubesat-for-beginner"
+                  ],
                   "relatedCourseIds": [],
                   "recommendWhen": [
                     "cubesat"
@@ -1231,7 +1259,9 @@
                 "payload คืออะไร",
                 "ทำไมต้องมีกล้อง"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "space-as-infrastructure"
+              ],
               "relatedCourseIds": [
                 "earth-from-orbit",
                 "cubesat-for-beginner"
@@ -1274,7 +1304,9 @@
               "intentHints": [
                 "โปรแกรมดาวเทียมคิดยังไง"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "cubesat-for-beginner"
+              ],
               "relatedCourseIds": [],
               "recommendWhen": [
                 "code",
@@ -1304,7 +1336,10 @@
               "intentHints": [
                 "รอด eclipse ยังไง"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "sense-decide-act",
+                "heat-and-shadow"
+              ],
               "relatedCourseIds": [],
               "recommendWhen": [
                 "code",
@@ -1381,7 +1416,9 @@
                 "สถานีภาคพื้น",
                 "ground station"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "who-sees-whom"
+              ],
               "relatedCourseIds": [
                 "catch-the-pass",
                 "ground-and-ops"
@@ -1455,7 +1492,10 @@
                 "ปฏิบัติการดาวเทียม",
                 "mission ops"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "the-ground-station",
+                "catch-the-pass"
+              ],
               "relatedCourseIds": [],
               "recommendWhen": [
                 "ground-ops",
@@ -1484,7 +1524,9 @@
                 "telemetry",
                 "housekeeping"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "ground-and-ops"
+              ],
               "relatedCourseIds": [],
               "recommendWhen": [
                 "ground-ops"
@@ -1513,7 +1555,9 @@
                 "ส่งคำสั่งดาวเทียม",
                 "telecommand"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "ground-and-ops"
+              ],
               "relatedCourseIds": [],
               "recommendWhen": [
                 "ground-ops",
@@ -1628,7 +1672,9 @@
                 "ภาพถ่ายดาวเทียม",
                 "remote sensing เบื้องต้น"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "space-as-infrastructure"
+              ],
               "relatedCourseIds": [
                 "space-for-thailand",
                 "the-point-of-flying"
@@ -1662,7 +1708,9 @@
                 "NIR",
                 "ช่วงคลื่นภาพดาวเทียม"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "earth-from-orbit"
+              ],
               "relatedCourseIds": [],
               "recommendWhen": [
                 "earth-app"
@@ -1690,7 +1738,9 @@
                 "change detection",
                 "ภาพซ้ำ"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "earth-from-orbit"
+              ],
               "relatedCourseIds": [],
               "recommendWhen": [
                 "earth-app"
@@ -1728,7 +1778,10 @@
                 "อวกาศช่วยไทยยังไง",
                 "เกษตรจากดาวเทียม"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "thai-space-story",
+                "earth-from-orbit"
+              ],
               "relatedCourseIds": [
                 "earth-from-orbit",
                 "thai-space-story"
@@ -1764,7 +1817,9 @@
                 "ดูนาจากดาวเทียม",
                 "เกษตรอวกาศ"
               ],
-              "prerequisites": [],
+              "prerequisites": [
+                "space-for-thailand"
+              ],
               "relatedCourseIds": [],
               "recommendWhen": [
                 "thailand",

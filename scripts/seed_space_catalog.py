@@ -129,6 +129,7 @@ def main() -> None:
                                 intent_hints=["อวกาศเป็นโครงสร้างพื้นฐาน", "GPS มาจากไหน"],
                                 recommend_when=["why-space", "infrastructure"],
                                 tags=["foundations", "infrastructure"],
+                                prerequisites=["space-in-plain-sight"],
                                 related=["find-your-signal", "link-from-space", "earth-from-orbit"],
                             ),
                             course(
@@ -141,6 +142,7 @@ def main() -> None:
                                 intent_hints=["เศรษฐกิจอวกาศ", "ใครทำเงินจากดาวเทียม"],
                                 recommend_when=["career", "economy"],
                                 tags=["economy"],
+                                prerequisites=["space-as-infrastructure"],
                             ),
                             course(
                                 "thai-space-story",
@@ -152,6 +154,7 @@ def main() -> None:
                                 intent_hints=["อวกาศไทย", "ไทยมีดาวเทียมไหม"],
                                 recommend_when=["thailand", "why-space", "beginner-orientation"],
                                 tags=["thailand", "foundations"],
+                                prerequisites=["space-in-plain-sight"],
                                 related=["space-for-thailand", "cubesat-for-beginner"],
                             ),
                         ],
@@ -172,6 +175,7 @@ def main() -> None:
                                 intent_hints=["วงโคจรคืออะไร", "LEO ต่างจาก GEO ยังไง"],
                                 recommend_when=["orbits", "beginner-orientation"],
                                 tags=["orbits"],
+                                prerequisites=["space-in-plain-sight"],
                                 related=["low-earth", "high-and-parked"],
                             ),
                             course(
@@ -198,6 +202,7 @@ def main() -> None:
                                 intent_hints=["GEO คืออะไร", "ทำไมทีวีจากดาวเทียม"],
                                 recommend_when=["orbits", "gnss", "comms"],
                                 tags=["orbits", "geo"],
+                                prerequisites=["orbit-sense"],
                             ),
                             course(
                                 "who-sees-whom",
@@ -209,6 +214,7 @@ def main() -> None:
                                 intent_hints=["หน้าต่างผ่าน", "ทำไมคุยกับดาวเทียมไม่ได้ทั้งวัน"],
                                 recommend_when=["orbits", "ground-ops"],
                                 tags=["orbits", "ground"],
+                                prerequisites=["orbit-sense"],
                                 related=["catch-the-pass", "the-ground-station"],
                             ),
                             course(
@@ -221,6 +227,7 @@ def main() -> None:
                                 intent_hints=["กลุ่มดาวเทียม", "ทำไม GPS ต้องหลายดวง"],
                                 recommend_when=["orbits", "constellation"],
                                 tags=["orbits"],
+                                prerequisites=["orbit-sense"],
                                 related=["constellations", "find-your-signal"],
                             ),
                         ],
@@ -241,6 +248,7 @@ def main() -> None:
                                 intent_hints=["อวกาศอันตรายยังไง", "ทำไมต้องทนสุญญากาศ"],
                                 recommend_when=["environment", "physics"],
                                 tags=["environment"],
+                                prerequisites=["orbit-sense"],
                                 related=["heat-and-shadow", "radiation-hit"],
                             ),
                             course(
@@ -254,6 +262,7 @@ def main() -> None:
                                 recommend_when=["environment", "build-satellite"],
                                 tags=["environment", "thermal"],
                                 level="beginner",
+                                prerequisites=["harsh-space"],
                                 related=["power-on-orbit", "cubesat-for-beginner"],
                             ),
                             course(
@@ -266,6 +275,7 @@ def main() -> None:
                                 intent_hints=["Van Allen", "SEU คืออะไร"],
                                 recommend_when=["environment", "physics"],
                                 tags=["environment", "radiation"],
+                                prerequisites=["harsh-space"],
                             ),
                             course(
                                 "crowded-sky",
@@ -277,6 +287,7 @@ def main() -> None:
                                 intent_hints=["ขยะอวกาศ", "ดาวเทียมชนกัน"],
                                 recommend_when=["environment", "policy"],
                                 tags=["environment", "debris"],
+                                prerequisites=["orbit-sense"],
                             ),
                         ],
                     ),
@@ -440,6 +451,7 @@ def main() -> None:
                                         recommend_when=["build-satellite", "cubesat", "code"],
                                         tags=["cubesat", "pilot", "published"],
                                         level="beginner",
+                                        prerequisites=["orbit-sense"],
                                         related=["orbit-sense", "the-point-of-flying"],
                                         do_not_confuse=["space-for-thailand", "earth-from-orbit"],
                                         arena_hooks=["leo-orbit-one-lap"],
@@ -476,6 +488,7 @@ def main() -> None:
                                         intent_hints=["1U คืออะไร", "ทำไม 10 ซม."],
                                         recommend_when=["cubesat"],
                                         tags=["cubesat"],
+                                        prerequisites=["cubesat-for-beginner"],
                                     ),
                                     course(
                                         "cubesat-parade",
@@ -487,6 +500,7 @@ def main() -> None:
                                         intent_hints=["CubeSat จริงมีอะไรบ้าง"],
                                         recommend_when=["cubesat"],
                                         tags=["cubesat"],
+                                        prerequisites=["cubesat-for-beginner"],
                                     ),
                                 ],
                             ),
@@ -627,6 +641,7 @@ def main() -> None:
                                 intent_hints=["payload คืออะไร", "ทำไมต้องมีกล้อง"],
                                 recommend_when=["payload", "earth-app", "build-satellite"],
                                 tags=["bus", "payload"],
+                                prerequisites=["space-as-infrastructure"],
                                 related=["earth-from-orbit", "cubesat-for-beginner"],
                                 do_not_confuse=["space-in-plain-sight"],
                             ),
@@ -648,6 +663,7 @@ def main() -> None:
                                 intent_hints=["โปรแกรมดาวเทียมคิดยังไง"],
                                 recommend_when=["code", "build-satellite"],
                                 tags=["software"],
+                                prerequisites=["cubesat-for-beginner"],
                                 arena_hooks=["leo-orbit-one-lap"],
                             ),
                             course(
@@ -660,6 +676,7 @@ def main() -> None:
                                 intent_hints=["รอด eclipse ยังไง"],
                                 recommend_when=["code", "eps"],
                                 tags=["software"],
+                                prerequisites=["sense-decide-act", "heat-and-shadow"],
                                 arena_hooks=["leo-orbit-one-lap"],
                             ),
                             course(
@@ -699,6 +716,7 @@ def main() -> None:
                                 intent_hints=["สถานีภาคพื้น", "ground station"],
                                 recommend_when=["ground-ops"],
                                 tags=["ground"],
+                                prerequisites=["who-sees-whom"],
                                 related=["catch-the-pass", "ground-and-ops"],
                             ),
                             course(
@@ -731,6 +749,7 @@ def main() -> None:
                                 intent_hints=["ปฏิบัติการดาวเทียม", "mission ops"],
                                 recommend_when=["ground-ops", "career"],
                                 tags=["ground", "ops"],
+                                prerequisites=["the-ground-station", "catch-the-pass"],
                             ),
                             course(
                                 "housekeeping",
@@ -742,6 +761,7 @@ def main() -> None:
                                 intent_hints=["telemetry", "housekeeping"],
                                 recommend_when=["ground-ops"],
                                 tags=["ground"],
+                                prerequisites=["ground-and-ops"],
                             ),
                             course(
                                 "command-from-home",
@@ -753,6 +773,7 @@ def main() -> None:
                                 intent_hints=["ส่งคำสั่งดาวเทียม", "telecommand"],
                                 recommend_when=["ground-ops", "code"],
                                 tags=["ground"],
+                                prerequisites=["ground-and-ops"],
                             ),
                         ],
                     ),
@@ -810,6 +831,7 @@ def main() -> None:
                                 intent_hints=["ภาพถ่ายดาวเทียม", "remote sensing เบื้องต้น"],
                                 recommend_when=["earth-app"],
                                 tags=["eo"],
+                                prerequisites=["space-as-infrastructure"],
                                 do_not_confuse=["cubesat-for-beginner"],
                                 related=["space-for-thailand", "the-point-of-flying"],
                             ),
@@ -823,6 +845,7 @@ def main() -> None:
                                 intent_hints=["NIR", "ช่วงคลื่นภาพดาวเทียม"],
                                 recommend_when=["earth-app"],
                                 tags=["eo"],
+                                prerequisites=["earth-from-orbit"],
                             ),
                             course(
                                 "change-over-time",
@@ -834,6 +857,7 @@ def main() -> None:
                                 intent_hints=["change detection", "ภาพซ้ำ"],
                                 recommend_when=["earth-app"],
                                 tags=["eo"],
+                                prerequisites=["earth-from-orbit"],
                             ),
                         ],
                     ),
@@ -853,6 +877,7 @@ def main() -> None:
                                 intent_hints=["อวกาศช่วยไทยยังไง", "เกษตรจากดาวเทียม"],
                                 recommend_when=["thailand", "earth-app", "unknown-intent"],
                                 tags=["thailand", "eo"],
+                                prerequisites=["thai-space-story", "earth-from-orbit"],
                                 do_not_confuse=["cubesat-for-beginner"],
                                 related=["earth-from-orbit", "thai-space-story"],
                             ),
@@ -866,6 +891,7 @@ def main() -> None:
                                 intent_hints=["ดูนาจากดาวเทียม", "เกษตรอวกาศ"],
                                 recommend_when=["thailand", "earth-app", "agriculture"],
                                 tags=["thailand", "eo"],
+                                prerequisites=["space-for-thailand"],
                             ),
                             course(
                                 "water-and-flood",

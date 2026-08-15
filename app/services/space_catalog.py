@@ -41,6 +41,7 @@ def clear_catalog_cache() -> None:
 
 def _validate_tree(nodes: list[CatalogNode]) -> None:
     seen_ids: set[str] = set()
+    courses: list[CatalogCourse] = []
 
     def walk(items: list[CatalogNode]) -> None:
         for node in items:
@@ -52,11 +53,19 @@ def _validate_tree(nodes: list[CatalogNode]) -> None:
                     raise ValueError(f"Folder {node.id} has no children")
                 walk(node.children)
             elif isinstance(node, CatalogCourse):
+                courses.append(node)
                 if node.status == "published" and node.id == "cubesat-for-beginner":
                     if not node.outline or len(node.outline) < 1:
                         raise ValueError("Pilot course must include outline modules")
 
     walk(nodes)
+    course_ids = {item.id for item in courses}
+    for item in courses:
+        for pre in item.prerequisites:
+            if pre not in course_ids:
+                raise ValueError(f"{item.id} has unknown prerequisite {pre}")
+            if pre == item.id:
+                raise ValueError(f"{item.id} cannot require itself")
 
 
 def iter_courses(

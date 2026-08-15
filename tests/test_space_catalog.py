@@ -55,6 +55,26 @@ def test_digest_includes_intent_hints_for_published_and_coming_soon():
     assert "intentHints:" in md
 
 
+def test_prerequisites_point_at_real_courses_and_branch():
+    catalog_service.clear_catalog_cache()
+    by_id = {c.id: c for c in catalog_service.iter_courses()}
+    assert by_id["space-in-plain-sight"].prerequisites == []
+    assert by_id["orbit-sense"].prerequisites == ["space-in-plain-sight"]
+    assert by_id["low-earth"].prerequisites == ["orbit-sense"]
+    assert by_id["cubesat-for-beginner"].prerequisites == ["orbit-sense"]
+    assert by_id["space-for-thailand"].prerequisites == [
+        "thai-space-story",
+        "earth-from-orbit",
+    ]
+    assert by_id["ground-and-ops"].prerequisites == [
+        "the-ground-station",
+        "catch-the-pass",
+    ]
+    digest = catalog_service.format_catalog_digest()
+    assert "prereq: orbit-sense" in digest
+    assert "prereq: thai-space-story, earth-from-orbit" in digest
+
+
 def test_format_catalog_digest_max_chars():
     short = catalog_service.format_catalog_digest(max_chars=400)
     assert "truncated" in short.lower() or len(short) <= 500

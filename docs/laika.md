@@ -307,6 +307,12 @@ Each assist call builds a **human** prompt (see `app/services/rag/context_window
 5. Folders are navigation only — never recommend a folder as a lesson
 6. When a published course has `outline[]`, LAIKA may point to module ids inside that course; outline items are not separate tree leaves
 
+### Space path mode (not Studio)
+
+`POST /space/laika/path/stream` is a separate session: flowing Thai chat + a live course map (DAG, pan/zoom). RAG is off. The model may append a ```path JSON fence (`steps` plus optional `edges`); the API strips it from `token` events and emits sanitized `plan_delta` / `plan`. Recommend-by-id rules above still apply. Opening copy is shown in the UI; skip persists as `status: skipped` without calling the LLM.
+
+Studio chat should not own the learning path. If asked, point the learner to Space.
+
 System prompts (`prompts.py`) instruct gender-neutral mentor Thai, Markdown/LaTeX, and **natural greeting** — use the learner's name sparingly; do not greet on every reply.
 
 Studio chat sends `messages` via `toLaikaHistory()` (`created_at` per node), plus `client_now` on each assist/stream call.

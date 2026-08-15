@@ -487,6 +487,38 @@ List completed Space modules for the current user.
 
 Idempotent mark module complete (registry module ids under a published course).
 
+### GET `/space/learning-path`
+
+Current learning path for the user.
+
+**Response `200`**
+
+- `status: "none"` — never planned or skipped (first visit)
+- `status: "skipped"` — learner chose to browse the catalog themselves
+- `status: "active"` — saved path: `intentText`, `intentTags`, `steps[]` (`courseId`, optional `note`), optional `edges[]` (`from`, `to` course ids; DAG, not a forced sequence), `chatTranscript`
+
+### PUT `/space/learning-path`
+
+Save an active path or mark skipped.
+
+**Body:** `{ "status": "skipped" | "active", "intentText"?, "intentTags"?, "steps"?, "edges"?, "chatTranscript"? }`
+
+Unknown `courseId` values are stripped. Active paths with no remaining catalog ids return `400`.
+
+### DELETE `/space/learning-path`
+
+Clear the saved path (`204`) so the learner can plan again.
+
+### POST `/space/laika/path/stream`
+
+Multi-turn Space path chat (SSE). No RAG. Auth required. LLM must be enabled (`laika_llm_enabled`).
+
+**Body:** `{ "content": "…", "messages": [{ "role": "user"|"assistant", "content": "…" }] }`
+
+**Events:** `status`, `token` (spoken text only), `plan_delta` / `plan` (sanitized `{ intentTags, steps, edges, final }`), `done`, `error`.
+
+Server strips unknown course ids from every plan payload. `plan` with `final: true` is auto-saved.
+
 ---
 
 ## Arena
