@@ -1,0 +1,2660 @@
+{
+  "domainId": "space-technology",
+  "title": "Space Technology",
+  "titleTh": "เทคโนโลยีอวกาศ",
+  "summary": "โดเมนการเรียนรู้เทคโนโลยีอวกาศของ Lunar — ไม่จำกัดแค่ดาวเทียม CubeSat เป็นหัวข้อนำร่อง",
+  "nodes": [
+    {
+      "kind": "folder",
+      "id": "around-us",
+      "title": "AROUND US",
+      "titleTh": "อวกาศรอบตัว",
+      "summary": "ทำไมอวกาศเกี่ยวกับเรา วงโคจร และสภาพที่ของบนฟ้าต้องทน",
+      "children": [
+        {
+          "kind": "folder",
+          "id": "why-space",
+          "title": "WHY SPACE",
+          "titleTh": "ทำไมต้องมี",
+          "summary": "บทบาทอวกาศในชีวิตประจำวัน เศรษฐกิจ และบริบทไทย",
+          "children": [
+            {
+              "kind": "course",
+              "id": "space-in-plain-sight",
+              "title": "SPACE IN PLAIN SIGHT",
+              "titleTh": "อวกาศที่อยู่รอบตัว",
+              "summary": "ของบนฟ้าอยู่ในชีวิตประจำวันโดยไม่ต้องเห็นจรวด",
+              "status": "coming_soon",
+              "level": "intro",
+              "tags": [
+                "foundations",
+                "everyday"
+              ],
+              "teaches": [
+                "everyday space services",
+                "why learn space tech"
+              ],
+              "audience": "คนที่ยังไม่แน่ใจว่าอวกาศเกี่ยวกับตัวเองยังไง",
+              "intentHints": [
+                "อวกาศเกี่ยวกับชีวิตประจำวันยังไง",
+                "ทำไมต้องเรียนเทคโนโลยีอวกาศ"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [
+                "thai-space-story",
+                "orbit-sense"
+              ],
+              "recommendWhen": [
+                "unknown-intent",
+                "why-space",
+                "beginner-orientation"
+              ],
+              "doNotConfuseWith": [
+                "cubesat-for-beginner"
+              ],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "space-as-infrastructure",
+              "title": "SPACE AS INFRASTRUCTURE",
+              "titleTh": "อวกาศคือโครงสร้างพื้นฐาน",
+              "summary": "สื่อสาร นำทาง ภาพ เวลา เป็นสาธารณูปโภค",
+              "status": "coming_soon",
+              "level": "intro",
+              "tags": [
+                "foundations",
+                "infrastructure"
+              ],
+              "teaches": [
+                "comm nav imaging as infrastructure",
+                "hidden space services"
+              ],
+              "audience": "คนที่อยากเห็นอวกาศเป็นระบบพื้นฐานของโลก",
+              "intentHints": [
+                "อวกาศเป็นโครงสร้างพื้นฐาน",
+                "GPS มาจากไหน"
+              ],
+              "prerequisites": [
+                "space-in-plain-sight"
+              ],
+              "relatedCourseIds": [
+                "find-your-signal",
+                "link-from-space",
+                "earth-from-orbit"
+              ],
+              "recommendWhen": [
+                "why-space",
+                "infrastructure"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "who-pays-for-space",
+              "title": "WHO PAYS FOR SPACE",
+              "titleTh": "ใครจ่าย ใครใช้",
+              "summary": "เศรษฐกิจอวกาศแบบจับต้องได้ ไม่ใช่แค่นาซา",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "economy"
+              ],
+              "teaches": [
+                "space economy actors",
+                "who pays who uses"
+              ],
+              "audience": "คนที่สนใจธุรกิจและคุณค่าทางเศรษฐกิจ",
+              "intentHints": [
+                "เศรษฐกิจอวกาศ",
+                "ใครทำเงินจากดาวเทียม"
+              ],
+              "prerequisites": [
+                "space-as-infrastructure"
+              ],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "career",
+                "economy"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "thai-space-story",
+              "title": "THAI SPACE STORY",
+              "titleTh": "อวกาศไทยมีอะไรมาแล้ว",
+              "summary": "ผลงานและหน่วยงานในประเทศ ทำไม CubeSat ถึงโชว์ได้",
+              "status": "coming_soon",
+              "level": "intro",
+              "tags": [
+                "thailand",
+                "foundations"
+              ],
+              "teaches": [
+                "Thai space context",
+                "why CubeSat is a local entry"
+              ],
+              "audience": "คนที่อยากเห็นบริบทไทยก่อนลงมือ",
+              "intentHints": [
+                "อวกาศไทย",
+                "ไทยมีดาวเทียมไหม"
+              ],
+              "prerequisites": [
+                "space-in-plain-sight"
+              ],
+              "relatedCourseIds": [
+                "space-for-thailand",
+                "cubesat-for-beginner"
+              ],
+              "recommendWhen": [
+                "thailand",
+                "why-space",
+                "beginner-orientation"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "orbits",
+          "title": "ORBITS",
+          "titleTh": "วงโคจร",
+          "summary": "วงโคจรแบบเห็นภาพ ครอบคลุม และหน้าต่างผ่าน",
+          "children": [
+            {
+              "kind": "course",
+              "id": "orbit-sense",
+              "title": "ORBIT SENSE",
+              "titleTh": "วงโคจรแบบเห็นภาพ",
+              "summary": "ตกค้างฟ้า ความสูงต่างกันงานต่างกัน",
+              "status": "coming_soon",
+              "level": "intro",
+              "tags": [
+                "orbits"
+              ],
+              "teaches": [
+                "what an orbit is",
+                "LEO MEO GEO intuition"
+              ],
+              "audience": "ทุกคนที่เริ่มเรียน Space",
+              "intentHints": [
+                "วงโคจรคืออะไร",
+                "LEO ต่างจาก GEO ยังไง"
+              ],
+              "prerequisites": [
+                "space-in-plain-sight"
+              ],
+              "relatedCourseIds": [
+                "low-earth",
+                "high-and-parked"
+              ],
+              "recommendWhen": [
+                "orbits",
+                "beginner-orientation"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "low-earth",
+              "title": "LOW EARTH",
+              "titleTh": "ชีวิตใน LEO",
+              "summary": "วงใกล้ ผ่านเร็ว eclipse หน้าต่างสั้น บ้านของ CubeSat",
+              "status": "coming_soon",
+              "level": "beginner",
+              "tags": [
+                "orbits",
+                "leo"
+              ],
+              "teaches": [
+                "LEO lifestyle",
+                "eclipse fraction",
+                "short passes"
+              ],
+              "audience": "คนที่สนใจของบินใกล้โลก",
+              "intentHints": [
+                "LEO คืออะไร",
+                "ทำไม CubeSat อยู่ LEO"
+              ],
+              "prerequisites": [
+                "orbit-sense"
+              ],
+              "relatedCourseIds": [
+                "harsh-space",
+                "cubesat-for-beginner"
+              ],
+              "recommendWhen": [
+                "orbits",
+                "build-satellite"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "high-and-parked",
+              "title": "HIGH AND PARKED",
+              "titleTh": "MEO / GEO",
+              "summary": "นำทางกับสื่อสารทำไมอยู่สูงกว่า",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "orbits",
+                "geo"
+              ],
+              "teaches": [
+                "MEO for GNSS",
+                "GEO parked longitude"
+              ],
+              "audience": "คนที่สนใจนำทางและสื่อสาร",
+              "intentHints": [
+                "GEO คืออะไร",
+                "ทำไมทีวีจากดาวเทียม"
+              ],
+              "prerequisites": [
+                "orbit-sense"
+              ],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "orbits",
+                "gnss",
+                "comms"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "who-sees-whom",
+              "title": "WHO SEES WHOM",
+              "titleTh": "เส้นทางบนโลกกับหน้าต่างผ่าน",
+              "summary": "กราวด์แทร็ก ครอบคลุม ทำไมไทยเห็น LEO เป็นช่วง ๆ",
+              "status": "coming_soon",
+              "level": "intro",
+              "tags": [
+                "orbits",
+                "ground"
+              ],
+              "teaches": [
+                "ground track",
+                "coverage",
+                "pass windows"
+              ],
+              "audience": "คนที่สนใจว่าสถานีเห็นดาวเทียมเมื่อไหร่",
+              "intentHints": [
+                "หน้าต่างผ่าน",
+                "ทำไมคุยกับดาวเทียมไม่ได้ทั้งวัน"
+              ],
+              "prerequisites": [
+                "orbit-sense"
+              ],
+              "relatedCourseIds": [
+                "catch-the-pass",
+                "the-ground-station"
+              ],
+              "recommendWhen": [
+                "orbits",
+                "ground-ops"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "many-in-formation",
+              "title": "MANY IN FORMATION",
+              "titleTh": "บินเป็นกลุ่ม",
+              "summary": "หลายดวงทำงานร่วมกันแบบ intuition",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "orbits"
+              ],
+              "teaches": [
+                "constellation intuition",
+                "formation idea"
+              ],
+              "audience": "คนที่สงสัยว่าทำไมต้องหลายดวง",
+              "intentHints": [
+                "กลุ่มดาวเทียม",
+                "ทำไม GPS ต้องหลายดวง"
+              ],
+              "prerequisites": [
+                "orbit-sense"
+              ],
+              "relatedCourseIds": [
+                "constellations",
+                "find-your-signal"
+              ],
+              "recommendWhen": [
+                "orbits",
+                "constellation"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "environment",
+          "title": "ENVIRONMENT",
+          "titleTh": "สภาพอวกาศ",
+          "summary": "สุญญากาศ อุณหภูมิ รังสี ขยะอวกาศ",
+          "children": [
+            {
+              "kind": "course",
+              "id": "harsh-space",
+              "title": "HARSH SPACE",
+              "titleTh": "อยู่รอดในอวกาศ",
+              "summary": "สุญญากาศ ร้อนเย็น รังสี รวมภาพแรก",
+              "status": "coming_soon",
+              "level": "intro",
+              "tags": [
+                "environment"
+              ],
+              "teaches": [
+                "vacuum",
+                "thermal extremes",
+                "radiation overview"
+              ],
+              "audience": "คนที่อยากรู้ว่าทำไมของบนฟ้าพังง่าย",
+              "intentHints": [
+                "อวกาศอันตรายยังไง",
+                "ทำไมต้องทนสุญญากาศ"
+              ],
+              "prerequisites": [
+                "orbit-sense"
+              ],
+              "relatedCourseIds": [
+                "heat-and-shadow",
+                "radiation-hit"
+              ],
+              "recommendWhen": [
+                "environment",
+                "physics"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "heat-and-shadow",
+              "title": "HEAT AND SHADOW",
+              "titleTh": "ร้อน เย็น เงาโลก",
+              "summary": "แดดเต็ม / เงาโลก / ฮีตเตอร์",
+              "status": "coming_soon",
+              "level": "beginner",
+              "tags": [
+                "environment",
+                "thermal"
+              ],
+              "teaches": [
+                "eclipse thermal",
+                "heater role"
+              ],
+              "audience": "คนที่เรียนพลังงานและอุณหภูมิ",
+              "intentHints": [
+                "eclipse หนาวไหม",
+                "ทำไมต้องมีฮีตเตอร์"
+              ],
+              "prerequisites": [
+                "harsh-space"
+              ],
+              "relatedCourseIds": [
+                "power-on-orbit",
+                "cubesat-for-beginner"
+              ],
+              "recommendWhen": [
+                "environment",
+                "build-satellite"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "radiation-hit",
+              "title": "RADIATION HIT",
+              "titleTh": "รังสีกับอิเล็กทรอนิกส์",
+              "summary": "Van Allen, upset, ทำไมอิเล็กทรอนิกส์พลิกบิตได้",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "environment",
+                "radiation"
+              ],
+              "teaches": [
+                "Van Allen",
+                "SEU intuition"
+              ],
+              "audience": "คนที่เรียนฟิสิกส์หรืออิเล็กทรอนิกส์บนฟ้า",
+              "intentHints": [
+                "Van Allen",
+                "SEU คืออะไร"
+              ],
+              "prerequisites": [
+                "harsh-space"
+              ],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "environment",
+                "physics"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "crowded-sky",
+              "title": "CROWDED SKY",
+              "titleTh": "ขยะอวกาศ",
+              "summary": "เศษซาก การชน ความหนาแน่นบนทางหลวงฟ้า",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "environment",
+                "debris"
+              ],
+              "teaches": [
+                "debris risk",
+                "crowded orbits"
+              ],
+              "audience": "คนที่สนใจความยั่งยืนของวงโคจร",
+              "intentHints": [
+                "ขยะอวกาศ",
+                "ดาวเทียมชนกัน"
+              ],
+              "prerequisites": [
+                "orbit-sense"
+              ],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "environment",
+                "policy"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "folder",
+      "id": "access",
+      "title": "ACCESS",
+      "titleTh": "ขึ้นสู่อวกาศ",
+      "summary": "ทางขึ้น rideshare จรวด และชั่วโมงแรกบนฟ้า",
+      "children": [
+        {
+          "kind": "folder",
+          "id": "rideshare",
+          "title": "RIDESHARE",
+          "titleTh": "นั่งไปกับคนอื่น",
+          "summary": "ขึ้นวงโดยไม่ต้องเป็นเจ้าของจรวด",
+          "children": [
+            {
+              "kind": "course",
+              "id": "path-to-orbit",
+              "title": "PATH TO ORBIT",
+              "titleTh": "ทางขึ้นสู่วงโคจร",
+              "summary": "จากพื้นถึงวงโคจร โดยไม่ต้องเป็นเจ้าของจรวด",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "launch"
+              ],
+              "teaches": [
+                "rideshare mindset",
+                "path to orbit"
+              ],
+              "audience": "คนที่อยากรู้ว่าของเล็กขึ้นฟ้ายังไง",
+              "intentHints": [
+                "ปล่อยดาวเทียมยังไง",
+                "rideshare"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "launch",
+                "access"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "the-deployer",
+              "title": "THE DEPLOYER",
+              "titleTh": "กล่องปล่อยดาวเทียม",
+              "summary": "CubeSat ถูกยัดและดีดยังไง",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "launch",
+                "cubesat"
+              ],
+              "teaches": [
+                "deployer role",
+                "ejection"
+              ],
+              "audience": "คนที่สนใจขั้นตอนหลังขึ้นจรวด",
+              "intentHints": [
+                "deployer คืออะไร",
+                "CubeSat ถูกปล่อยยังไง"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "launch",
+                "cubesat"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "ticket-to-fly",
+              "title": "TICKET TO FLY",
+              "titleTh": "ข้อจำกัดตอนจองที่บนจรวด",
+              "summary": "มวล ปริมาตร ความถี่ ความปลอดภัย",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "launch",
+                "constraints"
+              ],
+              "teaches": [
+                "mass volume constraints",
+                "launch safety limits"
+              ],
+              "audience": "คนที่ออกแบบของให้ขึ้นไปได้",
+              "intentHints": [
+                "ข้อจำกัดตอนปล่อย",
+                "มวลเท่าไหร่ขึ้นได้"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "launch",
+                "constraints"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "vehicles",
+          "title": "VEHICLES",
+          "titleTh": "ตัวปล่อย",
+          "summary": "จรวดและเส้นทางขึ้นฟ้าแบบ conceptual",
+          "children": [
+            {
+              "kind": "course",
+              "id": "rockets",
+              "title": "ROCKETS",
+              "titleTh": "จรวดคืออะไร",
+              "summary": "ตัวปล่อยทำงานแบบ conceptual ไม่ลงสูตรเชื้อเพลิง",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "launch",
+                "rockets"
+              ],
+              "teaches": [
+                "rocket as launcher",
+                "staging intuition"
+              ],
+              "audience": "คนที่อยากเข้าใจจรวดโดยไม่เป็นวิศวะจรวด",
+              "intentHints": [
+                "จรวดทำงานยังไง"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "launch"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "small-launchers",
+              "title": "SMALL LAUNCHERS",
+              "titleTh": "จรวดเล็ก",
+              "summary": "ทางเลือกปล่อยของเล็ก",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "launch"
+              ],
+              "teaches": [
+                "small launcher niche"
+              ],
+              "audience": "คนที่สนใจทางเลือกปล่อยเฉพาะ",
+              "intentHints": [
+                "จรวดเล็ก",
+                "small launcher"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "launch"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "the-ride-up",
+              "title": "THE RIDE UP",
+              "titleTh": "เส้นทางขึ้นฟ้าแบบเห็นภาพ",
+              "summary": "ขึ้น แยกขั้น เข้าวง",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "launch"
+              ],
+              "teaches": [
+                "ascent story",
+                "injection intuition"
+              ],
+              "audience": "คนที่อยากเห็นลำดับขึ้นฟ้า",
+              "intentHints": [
+                "ตอนขึ้นจรวดเกิดอะไร"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "launch"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "first-hours",
+          "title": "FIRST HOURS",
+          "titleTh": "ชั่วโมงแรกบนฟ้า",
+          "summary": "หลังแยกจากจรวดจนเริ่มภารกิจ",
+          "children": [
+            {
+              "kind": "course",
+              "id": "leaving-the-rocket",
+              "title": "LEAVING THE ROCKET",
+              "titleTh": "ออกจากจรวด",
+              "summary": "ดีด หมุน แผงยังไม่กาง",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "launch",
+                "ops"
+              ],
+              "teaches": [
+                "deployment tumble",
+                "first moments"
+              ],
+              "audience": "คนที่สนใจช่วงหลังปล่อย",
+              "intentHints": [
+                "หลังปล่อยเกิดอะไร",
+                "detumble"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "launch",
+                "ops"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "first-light",
+              "title": "FIRST LIGHT",
+              "titleTh": "เปิดตาครั้งแรก",
+              "summary": "detumble แผง บีคอน commissioning",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "ops"
+              ],
+              "teaches": [
+                "commissioning",
+                "first beacon"
+              ],
+              "audience": "คนที่สนใจเริ่มปฏิบัติการ",
+              "intentHints": [
+                "commissioning",
+                "เปิดแผงโซลาร์"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "ops",
+                "build-satellite"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "folder",
+      "id": "flight",
+      "title": "FLIGHT",
+      "titleTh": "ของที่บิน",
+      "summary": "แพลตฟอร์ม ระบบบนยาน และการสั่งงาน — CubeSat เป็นกิ่งนำร่อง",
+      "children": [
+        {
+          "kind": "folder",
+          "id": "platforms",
+          "title": "PLATFORMS",
+          "titleTh": "แพลตฟอร์ม",
+          "summary": "CubeSat และของบินแบบอื่น",
+          "children": [
+            {
+              "kind": "folder",
+              "id": "cubesat",
+              "title": "CUBESAT",
+              "titleTh": "ดาวเทียมเล็กมาตรฐาน",
+              "summary": "มาตรฐาน 10 ซม. และคอร์สนำร่องของ Lunar",
+              "children": [
+                {
+                  "kind": "course",
+                  "id": "cubesat-for-beginner",
+                  "title": "CUBESAT FOR BEGINNER",
+                  "titleTh": "พื้นฐานดาวเทียมเล็ก",
+                  "summary": "ภาพรวม กายวิภาค ฟิสิกส์ สั่งงาน — หัวข้อนำร่องที่มีบทเรียนจริง",
+                  "status": "published",
+                  "level": "beginner",
+                  "tags": [
+                    "cubesat",
+                    "pilot",
+                    "published"
+                  ],
+                  "teaches": [
+                    "CubeSat overview",
+                    "subsystem map",
+                    "orbit physics for beginners",
+                    "sense-decide-act toward Arena"
+                  ],
+                  "audience": "คนที่อยากจับต้องของบินเล็กและฝึกใน Arena",
+                  "intentHints": [
+                    "อยากสร้าง CubeSat",
+                    "อยากเรียนประกอบดาวเทียม",
+                    "อยากเขียนโปรแกรมสั่งดาวเทียม"
+                  ],
+                  "prerequisites": [
+                    "orbit-sense"
+                  ],
+                  "relatedCourseIds": [
+                    "orbit-sense",
+                    "the-point-of-flying"
+                  ],
+                  "recommendWhen": [
+                    "build-satellite",
+                    "cubesat",
+                    "code"
+                  ],
+                  "doNotConfuseWith": [
+                    "space-for-thailand",
+                    "earth-from-orbit"
+                  ],
+                  "arenaHooks": [
+                    "leo-orbit-one-lap"
+                  ],
+                  "outline": [
+                    {
+                      "id": "overview",
+                      "title": "Overview of Satellite",
+                      "summary": "วงโคจร ภารกิจ พิพิธภัณฑ์ CubeSat"
+                    },
+                    {
+                      "id": "anatomy",
+                      "title": "Anatomy of CubeSat",
+                      "summary": "ชิ้นส่วน ไฟ/ข้อมูล"
+                    },
+                    {
+                      "id": "physics",
+                      "title": "Physics for Space",
+                      "summary": "eclipse รังสี งบพลังงาน"
+                    },
+                    {
+                      "id": "programming",
+                      "title": "Programming for CubeSat",
+                      "summary": "sense-decide-act → Arena"
+                    }
+                  ]
+                },
+                {
+                  "kind": "course",
+                  "id": "why-ten-centimeters",
+                  "title": "WHY TEN CENTIMETERS",
+                  "titleTh": "ทำไมเป็นกล่อง 10 ซม.",
+                  "summary": "มาตรฐาน rideshare 1U–12U ทำอะไรได้ไม่ได้",
+                  "status": "later",
+                  "level": "intro",
+                  "tags": [
+                    "cubesat"
+                  ],
+                  "teaches": [
+                    "form factor",
+                    "1U limits"
+                  ],
+                  "audience": "คนที่สงสัยมาตรฐานขนาด",
+                  "intentHints": [
+                    "1U คืออะไร",
+                    "ทำไม 10 ซม."
+                  ],
+                  "prerequisites": [
+                    "cubesat-for-beginner"
+                  ],
+                  "relatedCourseIds": [],
+                  "recommendWhen": [
+                    "cubesat"
+                  ],
+                  "doNotConfuseWith": [],
+                  "arenaHooks": [],
+                  "outline": null
+                },
+                {
+                  "kind": "course",
+                  "id": "cubesat-parade",
+                  "title": "CUBESAT PARADE",
+                  "titleTh": "ภารกิจ CubeSat จริง",
+                  "summary": "ดูของจริงและภารกิจตัวอย่าง",
+                  "status": "later",
+                  "level": "intro",
+                  "tags": [
+                    "cubesat"
+                  ],
+                  "teaches": [
+                    "real CubeSat missions"
+                  ],
+                  "audience": "คนที่อยากเห็นตัวอย่างจริง",
+                  "intentHints": [
+                    "CubeSat จริงมีอะไรบ้าง"
+                  ],
+                  "prerequisites": [
+                    "cubesat-for-beginner"
+                  ],
+                  "relatedCourseIds": [],
+                  "recommendWhen": [
+                    "cubesat"
+                  ],
+                  "doNotConfuseWith": [],
+                  "arenaHooks": [],
+                  "outline": null
+                }
+              ]
+            },
+            {
+              "kind": "folder",
+              "id": "other-craft",
+              "title": "OTHER CRAFT",
+              "titleTh": "ของบินแบบอื่น",
+              "summary": "ของที่ไม่ใช่ CubeSat แต่ยังเป็นเทคโนโลยีอวกาศ",
+              "children": [
+                {
+                  "kind": "course",
+                  "id": "small-satellites",
+                  "title": "SMALL SATELLITES",
+                  "titleTh": "ดาวเทียมที่ใหญ่กว่า CubeSat",
+                  "summary": "เมื่อ 1U ไม่พอ",
+                  "status": "later",
+                  "level": "intro",
+                  "tags": [
+                    "platforms"
+                  ],
+                  "teaches": [
+                    "beyond 1U platforms"
+                  ],
+                  "audience": "คนที่ต้องการความสามารถมากกว่า CubeSat",
+                  "intentHints": [
+                    "ดาวเทียมเล็กที่ไม่ใช่ CubeSat"
+                  ],
+                  "prerequisites": [],
+                  "relatedCourseIds": [],
+                  "recommendWhen": [
+                    "platforms"
+                  ],
+                  "doNotConfuseWith": [],
+                  "arenaHooks": [],
+                  "outline": null
+                },
+                {
+                  "kind": "course",
+                  "id": "big-birds",
+                  "title": "BIG BIRDS",
+                  "titleTh": "ดาวเทียมสื่อสาร / ถ่ายภาพใหญ่",
+                  "summary": "ของที่คนใช้ทุกวัน แต่ไม่ได้ประกอบเอง",
+                  "status": "later",
+                  "level": "intro",
+                  "tags": [
+                    "platforms"
+                  ],
+                  "teaches": [
+                    "large EO and comm sats"
+                  ],
+                  "audience": "คนที่สนใจของใหญ่บนฟ้า",
+                  "intentHints": [
+                    "ดาวเทียมสื่อสาร",
+                    "ดาวเทียมถ่ายภาพใหญ่"
+                  ],
+                  "prerequisites": [],
+                  "relatedCourseIds": [],
+                  "recommendWhen": [
+                    "platforms",
+                    "comms",
+                    "earth-app"
+                  ],
+                  "doNotConfuseWith": [],
+                  "arenaHooks": [],
+                  "outline": null
+                },
+                {
+                  "kind": "course",
+                  "id": "high-altitude",
+                  "title": "HIGH ALTITUDE",
+                  "titleTh": "บอลลูนและยานสูง",
+                  "summary": "ของที่เกือบอวกาศ ใช้สอนได้โดยไม่ขึ้นวงโคจร",
+                  "status": "later",
+                  "level": "intro",
+                  "tags": [
+                    "platforms"
+                  ],
+                  "teaches": [
+                    "near-space platforms"
+                  ],
+                  "audience": "คนที่อยากทดลองใกล้พื้น",
+                  "intentHints": [
+                    "บอลลูนอวกาศ",
+                    "high altitude"
+                  ],
+                  "prerequisites": [],
+                  "relatedCourseIds": [],
+                  "recommendWhen": [
+                    "platforms"
+                  ],
+                  "doNotConfuseWith": [],
+                  "arenaHooks": [],
+                  "outline": null
+                },
+                {
+                  "kind": "course",
+                  "id": "beyond-earth",
+                  "title": "BEYOND EARTH",
+                  "titleTh": "ออกจากโลก",
+                  "summary": "โพรบ ดวงจันทร์ เป็นกิ่งเปิด ไม่ใช่แกนนำร่อง",
+                  "status": "later",
+                  "level": "intro",
+                  "tags": [
+                    "platforms"
+                  ],
+                  "teaches": [
+                    "beyond-Earth probes"
+                  ],
+                  "audience": "คนที่สนใจภารกิจนอกโลก",
+                  "intentHints": [
+                    "ไปดวงจันทร์",
+                    "โพรบ"
+                  ],
+                  "prerequisites": [],
+                  "relatedCourseIds": [],
+                  "recommendWhen": [
+                    "deep-space"
+                  ],
+                  "doNotConfuseWith": [],
+                  "arenaHooks": [],
+                  "outline": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "bus",
+          "title": "BUS",
+          "titleTh": "ระบบเลี้ยงเพย์โหลด",
+          "summary": "ไฟ คอม ทิศทาง วิทยุ เพย์โหลด — ใช้ร่วมได้หลายแพลตฟอร์ม",
+          "children": [
+            {
+              "kind": "course",
+              "id": "the-stack",
+              "title": "THE STACK",
+              "titleTh": "ซ้อนบอร์ดแล้วอยู่รอด",
+              "summary": "โครง ราง ชั้นบอร์ด โครงสร้าง",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "bus",
+                "structure"
+              ],
+              "teaches": [
+                "structure stack",
+                "mechanisms intro"
+              ],
+              "audience": "คนที่อยากรู้กายภาพของบัส",
+              "intentHints": [
+                "โครงสร้างดาวเทียม",
+                "stack board"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "hardware",
+                "build-satellite"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "power-on-orbit",
+              "title": "POWER ON ORBIT",
+              "titleTh": "ไฟบนฟ้า",
+              "summary": "โซลาร์ แบต โหลด งบพลังงานหนึ่งวง",
+              "status": "later",
+              "level": "beginner",
+              "tags": [
+                "bus",
+                "eps"
+              ],
+              "teaches": [
+                "EPS",
+                "power budget"
+              ],
+              "audience": "คนที่สนใจพลังงาน",
+              "intentHints": [
+                "แบตดาวเทียม",
+                "power budget"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "hardware",
+                "eps"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "keep-it-warm",
+              "title": "KEEP IT WARM",
+              "titleTh": "อุณหภูมิ",
+              "summary": "passive / ฮีตเตอร์ / ทำไม eclipse หนาว",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "bus",
+                "thermal"
+              ],
+              "teaches": [
+                "thermal control"
+              ],
+              "audience": "คนที่เรียนอุณหภูมิบนฟ้า",
+              "intentHints": [
+                "ควบคุมอุณหภูมิดาวเทียม"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "hardware",
+                "thermal"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "the-brain",
+              "title": "THE BRAIN",
+              "titleTh": "คอมพิวเตอร์บนยาน",
+              "summary": "loop หลัก โหมด ไฟล์โปรแกรม",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "bus",
+                "obc"
+              ],
+              "teaches": [
+                "OBC",
+                "modes",
+                "flight software shape"
+              ],
+              "audience": "คนที่สนใจซอฟต์แวร์บนยาน",
+              "intentHints": [
+                "OBC คืออะไร",
+                "คอมพิวเตอร์บนดาวเทียม"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "hardware",
+                "code"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "point-this-way",
+              "title": "POINT THIS WAY",
+              "titleTh": "ทิศทางและการทรงตัว",
+              "summary": "หันแผง หันเสา หันกล้อง",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "bus",
+                "adcs"
+              ],
+              "teaches": [
+                "ADCS intuition"
+              ],
+              "audience": "คนที่สงสัยว่าทำไมต้องชี้ทิศ",
+              "intentHints": [
+                "ADCS",
+                "ทำไมต้องหันดาวเทียม"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "hardware",
+                "adcs"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "talk-bands",
+              "title": "TALK BANDS",
+              "titleTh": "วิทยุบนยาน",
+              "summary": "ขึ้นลิงก์ ลงลิงก์ คุยได้แค่ตอนผ่าน",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "bus",
+                "comm"
+              ],
+              "teaches": [
+                "spacecraft radio",
+                "uplink downlink"
+              ],
+              "audience": "คนที่สนใจสื่อสารบนยาน",
+              "intentHints": [
+                "วิทยุดาวเทียม",
+                "uplink downlink"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "hardware",
+                "comms"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "the-point-of-flying",
+              "title": "THE POINT OF FLYING",
+              "titleTh": "เพย์โหลด คือเหตุผลที่ขึ้นไป",
+              "summary": "กล้อง เซนเซอร์ วิทยุ งานทดลอง",
+              "status": "coming_soon",
+              "level": "intro",
+              "tags": [
+                "bus",
+                "payload"
+              ],
+              "teaches": [
+                "payload is the mission",
+                "duty cycle"
+              ],
+              "audience": "คนที่อยากรู้ว่าขึ้นไปเพื่ออะไร",
+              "intentHints": [
+                "payload คืออะไร",
+                "ทำไมต้องมีกล้อง"
+              ],
+              "prerequisites": [
+                "space-as-infrastructure"
+              ],
+              "relatedCourseIds": [
+                "earth-from-orbit",
+                "cubesat-for-beginner"
+              ],
+              "recommendWhen": [
+                "payload",
+                "earth-app",
+                "build-satellite"
+              ],
+              "doNotConfuseWith": [
+                "space-in-plain-sight"
+              ],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "software",
+          "title": "SOFTWARE",
+          "titleTh": "สั่งงาน",
+          "summary": "ตรรกะบนยาน — ต่อกับ Arena ได้",
+          "children": [
+            {
+              "kind": "course",
+              "id": "sense-decide-act",
+              "title": "SENSE DECIDE ACT",
+              "titleTh": "รับรู้ ตัดสิน ลงมือ",
+              "summary": "โมเดลซอฟต์แวร์ของ Lunar",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "software"
+              ],
+              "teaches": [
+                "sense decide act loop"
+              ],
+              "audience": "คนที่เริ่มเขียนตรรกะภารกิจ",
+              "intentHints": [
+                "โปรแกรมดาวเทียมคิดยังไง"
+              ],
+              "prerequisites": [
+                "cubesat-for-beginner"
+              ],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "code",
+                "build-satellite"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [
+                "leo-orbit-one-lap"
+              ],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "live-through-eclipse",
+              "title": "LIVE THROUGH ECLIPSE",
+              "titleTh": "รอดช่วงไม่มีแดด",
+              "summary": "ตรรกะหนึ่งวง: แดด เงา แบต งาน",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "software"
+              ],
+              "teaches": [
+                "eclipse survival logic"
+              ],
+              "audience": "คนที่ฝึก Arena / พลังงาน",
+              "intentHints": [
+                "รอด eclipse ยังไง"
+              ],
+              "prerequisites": [
+                "sense-decide-act",
+                "heat-and-shadow"
+              ],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "code",
+                "eps"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [
+                "leo-orbit-one-lap"
+              ],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "safe-mode",
+              "title": "SAFE MODE",
+              "titleTh": "โหมดปลอดภัย",
+              "summary": "ตัดงาน เหลือตัวเอง",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "software"
+              ],
+              "teaches": [
+                "safe mode strategy"
+              ],
+              "audience": "คนที่เรียนโหมดบนยาน",
+              "intentHints": [
+                "safe mode คืออะไร"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "code",
+                "ops"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "folder",
+      "id": "ground",
+      "title": "GROUND",
+      "titleTh": "ภาคพื้น",
+      "summary": "สถานี ปฏิบัติการ และหลายดวง",
+      "children": [
+        {
+          "kind": "folder",
+          "id": "station",
+          "title": "STATION",
+          "titleTh": "สถานี",
+          "summary": "ฮาร์ดแวร์ภาคพื้นกับหน้าต่างผ่าน",
+          "children": [
+            {
+              "kind": "course",
+              "id": "the-ground-station",
+              "title": "THE GROUND STATION",
+              "titleTh": "สถานีภาคพื้นคืออะไร",
+              "summary": "จาน วิทยุ คอมพิวเตอร์ คน",
+              "status": "coming_soon",
+              "level": "intro",
+              "tags": [
+                "ground"
+              ],
+              "teaches": [
+                "ground station parts"
+              ],
+              "audience": "คนที่สนใจคุยกับของบนฟ้าจากพื้น",
+              "intentHints": [
+                "สถานีภาคพื้น",
+                "ground station"
+              ],
+              "prerequisites": [
+                "who-sees-whom"
+              ],
+              "relatedCourseIds": [
+                "catch-the-pass",
+                "ground-and-ops"
+              ],
+              "recommendWhen": [
+                "ground-ops"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "catch-the-pass",
+              "title": "CATCH THE PASS",
+              "titleTh": "จับหน้าต่างผ่าน",
+              "summary": "ตารางผ่าน เล็ง เริ่ม-จบการคุย",
+              "status": "coming_soon",
+              "level": "intro",
+              "tags": [
+                "ground"
+              ],
+              "teaches": [
+                "pass planning",
+                "contact window"
+              ],
+              "audience": "คนที่อยากรู้ว่าเมื่อไหร่คุยได้",
+              "intentHints": [
+                "จับ pass",
+                "หน้าต่างผ่านไทย"
+              ],
+              "prerequisites": [
+                "who-sees-whom"
+              ],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "ground-ops",
+                "orbits"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "ops",
+          "title": "OPS",
+          "titleTh": "ปฏิบัติการ",
+          "summary": "วงจรปฏิบัติการทั้งภารกิจ",
+          "children": [
+            {
+              "kind": "course",
+              "id": "ground-and-ops",
+              "title": "GROUND AND OPS",
+              "titleTh": "จากพื้นคุยกับฟ้า",
+              "summary": "วงจรปฏิบัติการทั้งภารกิจ",
+              "status": "coming_soon",
+              "level": "intro",
+              "tags": [
+                "ground",
+                "ops"
+              ],
+              "teaches": [
+                "ops loop",
+                "plan uplink downlink"
+              ],
+              "audience": "คนที่อยากทำงานปฏิบัติการ",
+              "intentHints": [
+                "ปฏิบัติการดาวเทียม",
+                "mission ops"
+              ],
+              "prerequisites": [
+                "the-ground-station",
+                "catch-the-pass"
+              ],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "ground-ops",
+                "career"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "housekeeping",
+              "title": "HOUSEKEEPING",
+              "titleTh": "ของบนฟ้าบอกอะไรกลับมา",
+              "summary": "แบต อุณหภูมิ โหมด เหตุการณ์",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "ground"
+              ],
+              "teaches": [
+                "telemetry housekeeping"
+              ],
+              "audience": "คนที่อ่านสถานะยาน",
+              "intentHints": [
+                "telemetry",
+                "housekeeping"
+              ],
+              "prerequisites": [
+                "ground-and-ops"
+              ],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "ground-ops"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "command-from-home",
+              "title": "COMMAND FROM HOME",
+              "titleTh": "ส่งคำสั่งจากพื้น",
+              "summary": "เปลี่ยนค่า ไม่ต้องเขียนโปรแกรมใหม่ทุกครั้ง",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "ground"
+              ],
+              "teaches": [
+                "telecommand",
+                "parameter tables"
+              ],
+              "audience": "คนที่สนใจสั่งงานจากพื้น",
+              "intentHints": [
+                "ส่งคำสั่งดาวเทียม",
+                "telecommand"
+              ],
+              "prerequisites": [
+                "ground-and-ops"
+              ],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "ground-ops",
+                "code"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "many-birds",
+          "title": "MANY BIRDS",
+          "titleTh": "หลายดวง",
+          "summary": "กลุ่มดาวเทียมและการกลับมาถ่ายซ้ำ",
+          "children": [
+            {
+              "kind": "course",
+              "id": "constellations",
+              "title": "CONSTELLATIONS",
+              "titleTh": "กลุ่มดาวเทียม",
+              "summary": "ทำไมงานบางอย่างดวงเดียวไม่พอ",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "ground"
+              ],
+              "teaches": [
+                "why many satellites"
+              ],
+              "audience": "คนที่สนใจ coverage",
+              "intentHints": [
+                "กลุ่มดาวเทียมทำไม"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "constellation",
+                "earth-app"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "revisit",
+              "title": "REVISIT",
+              "titleTh": "กลับมาถ่ายจุดเดิมเมื่อไหร่",
+              "summary": "ความถี่การกลับมา vs ครอบคลุม",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "ground",
+                "eo"
+              ],
+              "teaches": [
+                "revisit vs coverage"
+              ],
+              "audience": "คนที่ใช้ภาพซ้ำตามเวลา",
+              "intentHints": [
+                "revisit",
+                "ถ่ายจุดเดิมบ่อยแค่ไหน"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "earth-app",
+                "orbits"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "folder",
+      "id": "for-earth",
+      "title": "FOR EARTH",
+      "titleTh": "ใช้บนโลก",
+      "summary": "เอาข้อมูล/บริการจากอวกาศมาใช้บนพื้นโลก โดยไม่จำเป็นต้องประกอบดาวเทียมก่อน",
+      "children": [
+        {
+          "kind": "folder",
+          "id": "seeing",
+          "title": "SEEING",
+          "titleTh": "มองโลก",
+          "summary": "ภาพถ่ายจากวงโคจร",
+          "children": [
+            {
+              "kind": "course",
+              "id": "earth-from-orbit",
+              "title": "EARTH FROM ORBIT",
+              "titleTh": "มองโลกจากบนฟ้า",
+              "summary": "ภาพจากวงโคจร ความละเอียด แถบกวาด เมฆ",
+              "status": "coming_soon",
+              "level": "intro",
+              "tags": [
+                "eo"
+              ],
+              "teaches": [
+                "EO basics",
+                "resolution swath clouds"
+              ],
+              "audience": "คนที่อยากใช้ภาพจากอวกาศ",
+              "intentHints": [
+                "ภาพถ่ายดาวเทียม",
+                "remote sensing เบื้องต้น"
+              ],
+              "prerequisites": [
+                "space-as-infrastructure"
+              ],
+              "relatedCourseIds": [
+                "space-for-thailand",
+                "the-point-of-flying"
+              ],
+              "recommendWhen": [
+                "earth-app"
+              ],
+              "doNotConfuseWith": [
+                "cubesat-for-beginner"
+              ],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "color-beyond-eyes",
+              "title": "COLOR BEYOND EYES",
+              "titleTh": "สีที่ตาไม่เห็น",
+              "summary": "ช่วงคลื่น พืชสะท้อนอะไร",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "eo"
+              ],
+              "teaches": [
+                "spectral bands",
+                "NIR intuition"
+              ],
+              "audience": "คนที่อ่านภาพวิเคราะห์",
+              "intentHints": [
+                "NIR",
+                "ช่วงคลื่นภาพดาวเทียม"
+              ],
+              "prerequisites": [
+                "earth-from-orbit"
+              ],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "earth-app"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "change-over-time",
+              "title": "CHANGE OVER TIME",
+              "titleTh": "โลกเปลี่ยน เราเห็นจากบน",
+              "summary": "ภาพซ้ำ จับความเปลี่ยน",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "eo"
+              ],
+              "teaches": [
+                "change detection"
+              ],
+              "audience": "คนที่ติดตามพื้นที่ตามเวลา",
+              "intentHints": [
+                "change detection",
+                "ภาพซ้ำ"
+              ],
+              "prerequisites": [
+                "earth-from-orbit"
+              ],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "earth-app"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "thailand",
+          "title": "THAILAND",
+          "titleTh": "ใช้ในไทย",
+          "summary": "เคสในประเทศ — ไม่ต้องผ่าน CubeSat ก่อน",
+          "children": [
+            {
+              "kind": "course",
+              "id": "space-for-thailand",
+              "title": "SPACE FOR THAILAND",
+              "titleTh": "อวกาศเพื่อไทย",
+              "summary": "ภาพรวมการใช้ในประเทศ",
+              "status": "coming_soon",
+              "level": "intro",
+              "tags": [
+                "thailand",
+                "eo"
+              ],
+              "teaches": [
+                "Thai use cases overview"
+              ],
+              "audience": "คนที่อยากเห็นประโยชน์ในไทย",
+              "intentHints": [
+                "อวกาศช่วยไทยยังไง",
+                "เกษตรจากดาวเทียม"
+              ],
+              "prerequisites": [
+                "thai-space-story",
+                "earth-from-orbit"
+              ],
+              "relatedCourseIds": [
+                "earth-from-orbit",
+                "thai-space-story"
+              ],
+              "recommendWhen": [
+                "thailand",
+                "earth-app",
+                "unknown-intent"
+              ],
+              "doNotConfuseWith": [
+                "cubesat-for-beginner"
+              ],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "rice-from-orbit",
+              "title": "RICE FROM ORBIT",
+              "titleTh": "นาและพืช",
+              "summary": "เกษตรจากข้อมูลอวกาศ",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "thailand",
+                "eo"
+              ],
+              "teaches": [
+                "crop monitoring intuition"
+              ],
+              "audience": "คนที่สนใจเกษตร",
+              "intentHints": [
+                "ดูนาจากดาวเทียม",
+                "เกษตรอวกาศ"
+              ],
+              "prerequisites": [
+                "space-for-thailand"
+              ],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "thailand",
+                "earth-app",
+                "agriculture"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "water-and-flood",
+              "title": "WATER AND FLOOD",
+              "titleTh": "น้ำท่วมและแหล่งน้ำ",
+              "summary": "น้ำจากมุมมองวงโคจร",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "thailand",
+                "eo"
+              ],
+              "teaches": [
+                "flood and water EO"
+              ],
+              "audience": "คนที่สนใจภัยน้ำ",
+              "intentHints": [
+                "น้ำท่วมจากดาวเทียม"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "thailand",
+                "earth-app",
+                "disaster"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "forest-and-haze",
+              "title": "FOREST AND HAZE",
+              "titleTh": "ป่าและฝุ่น",
+              "summary": "ป่า ไฟ ฝุ่น",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "thailand",
+                "eo"
+              ],
+              "teaches": [
+                "forest haze monitoring"
+              ],
+              "audience": "คนที่สนใจป่าและอากาศ",
+              "intentHints": [
+                "ไฟป่าจากดาวเทียม",
+                "ฝุ่น PM"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "thailand",
+                "earth-app"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "sea-and-fish",
+              "title": "SEA AND FISH",
+              "titleTh": "ทะเลและประมง",
+              "summary": "ชายฝั่ง ประมง",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "thailand",
+                "eo"
+              ],
+              "teaches": [
+                "coastal fishery EO"
+              ],
+              "audience": "คนที่สนใจทะเล",
+              "intentHints": [
+                "ประมงกับดาวเทียม",
+                "ชายฝั่ง"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "thailand",
+                "earth-app"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "finding",
+          "title": "FINDING",
+          "titleTh": "หาตำแหน่ง",
+          "summary": "GNSS และเวลาจากฟ้า",
+          "children": [
+            {
+              "kind": "course",
+              "id": "find-your-signal",
+              "title": "FIND YOUR SIGNAL",
+              "titleTh": "นำทางจากอวกาศ",
+              "summary": "GNSS ในมือถือมาจากกลุ่มดาว",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "gnss"
+              ],
+              "teaches": [
+                "GNSS constellation idea"
+              ],
+              "audience": "ทุกคนที่ใช้แผนที่ในมือถือ",
+              "intentHints": [
+                "GPS ทำงานยังไง",
+                "GNSS"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "gnss",
+                "everyday"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "time-from-space",
+              "title": "TIME FROM SPACE",
+              "titleTh": "เวลาจากฟ้า",
+              "summary": "เวลาแม่นเป็นบริการที่ซ่อนอยู่",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "gnss"
+              ],
+              "teaches": [
+                "timing from GNSS"
+              ],
+              "audience": "คนที่สนใจโครงสร้างพื้นฐานเวลา",
+              "intentHints": [
+                "เวลามาจากดาวเทียม"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "gnss",
+                "infrastructure"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "talking",
+          "title": "TALKING",
+          "titleTh": "สื่อสาร",
+          "summary": "ลิงก์จากอวกาศสู่ผู้ใช้บนพื้น",
+          "children": [
+            {
+              "kind": "course",
+              "id": "link-from-space",
+              "title": "LINK FROM SPACE",
+              "titleTh": "สื่อสารจากอวกาศ",
+              "summary": "ภาพรวมลิงก์",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "comms"
+              ],
+              "teaches": [
+                "satcom overview"
+              ],
+              "audience": "คนที่สนใจสื่อสาร",
+              "intentHints": [
+                "สื่อสารดาวเทียม"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "comms"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "internet-from-orbit",
+              "title": "INTERNET FROM ORBIT",
+              "titleTh": "อินเทอร์เน็ตจากวงโคจร",
+              "summary": "LEO broadband vs CubeSat",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "comms"
+              ],
+              "teaches": [
+                "LEO broadband vs smallsat"
+              ],
+              "audience": "คนที่เปรียบเทียบบริการสื่อสาร",
+              "intentHints": [
+                "เน็ตจากดาวเทียม",
+                "Starlink"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "comms"
+              ],
+              "doNotConfuseWith": [
+                "cubesat-for-beginner"
+              ],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "iot-from-space",
+              "title": "IOT FROM SPACE",
+              "titleTh": "ส่งข้อมูลเล็กจากของไกล",
+              "summary": "เซนเซอร์สนาม ส่งผ่านดาวเทียม",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "comms"
+              ],
+              "teaches": [
+                "IoT from space"
+              ],
+              "audience": "คนที่สนใจเซนเซอร์ระยะไกล",
+              "intentHints": [
+                "IoT ดาวเทียม"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "comms",
+                "iot"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "science",
+          "title": "SCIENCE",
+          "titleTh": "วิทยาศาสตร์จากฟ้า",
+          "summary": "อากาศอวกาศและภูมิอากาศ",
+          "children": [
+            {
+              "kind": "course",
+              "id": "space-weather",
+              "title": "SPACE WEATHER",
+              "titleTh": "อากาศอวกาศ",
+              "summary": "พายุสุริยะ ผลต่อของบนฟ้าและบนดิน",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "science"
+              ],
+              "teaches": [
+                "space weather effects"
+              ],
+              "audience": "คนที่สนใจรังสีและพายุสุริยะ",
+              "intentHints": [
+                "space weather",
+                "พายุสุริยะ"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "science",
+                "environment"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "climate-from-above",
+              "title": "CLIMATE FROM ABOVE",
+              "titleTh": "ภูมิอากาศจากวงโคจร",
+              "summary": "เซนเซอร์ภูมิอากาศ",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "science",
+                "eo"
+              ],
+              "teaches": [
+                "climate sensing from orbit"
+              ],
+              "audience": "คนที่สนใจภูมิอากาศ",
+              "intentHints": [
+                "ภูมิอากาศจากดาวเทียม"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "science",
+                "earth-app"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "folder",
+      "id": "mission",
+      "title": "MISSION",
+      "titleTh": "ออกแบบภารกิจ",
+      "summary": "บีบปัญหา ข้อจำกัด และคนในห่วงโซ่",
+      "children": [
+        {
+          "kind": "folder",
+          "id": "shape",
+          "title": "SHAPE",
+          "titleTh": "บีบปัญหา",
+          "summary": "จากไอเดียเป็นภารกิจ",
+          "children": [
+            {
+              "kind": "course",
+              "id": "pick-a-problem",
+              "title": "PICK A PROBLEM",
+              "titleTh": "เลือกปัญหาบนโลก",
+              "summary": "บีบไอเดียให้เล็กพอทำ",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "mission"
+              ],
+              "teaches": [
+                "problem framing"
+              ],
+              "audience": "คนที่เข้า Studio / มีไอเดีย",
+              "intentHints": [
+                "เลือกปัญหาภารกิจ",
+                "เริ่มออกแบบภารกิจ"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "mission-design",
+                "studio"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "mission-canvas",
+              "title": "MISSION CANVAS",
+              "titleTh": "วาดภารกิจ",
+              "summary": "หนึ่งหน้า: ปัญหา วงโคจร เพย์โหลด ของเลี้ยง ภาคพื้น",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "mission"
+              ],
+              "teaches": [
+                "one-page mission canvas"
+              ],
+              "audience": "คนที่พร้อมร่างภารกิจ",
+              "intentHints": [
+                "mission canvas",
+                "ออกแบบภารกิจ"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "mission-design",
+                "studio"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "limits",
+          "title": "LIMITS",
+          "titleTh": "ข้อจำกัดที่สอน",
+          "summary": "มวล ไฟ ช่องลงข้อมูล และการรอดก่อนทำงาน",
+          "children": [
+            {
+              "kind": "course",
+              "id": "mass-power-downlink",
+              "title": "MASS POWER DOWNLINK",
+              "titleTh": "มวล ไฟ ช่องส่งข้อมูล",
+              "summary": "ข้อจำกัดที่บังคับให้เลือก",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "mission"
+              ],
+              "teaches": [
+                "mass power downlink trade"
+              ],
+              "audience": "คนที่ออกแบบภายใต้ข้อจำกัด",
+              "intentHints": [
+                "ข้อจำกัดภารกิจ",
+                "trade-off ดาวเทียม"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "mission-design",
+                "constraints"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "alive-first",
+              "title": "ALIVE FIRST",
+              "titleTh": "รอดก่อน แล้วค่อยทำงาน",
+              "summary": "ภารกิจสวย ของตาย = ไม่ผ่าน",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "mission"
+              ],
+              "teaches": [
+                "survival before science"
+              ],
+              "audience": "คนที่ฝึก Arena หรือออกแบบบัส",
+              "intentHints": [
+                "รอดก่อนทำงาน",
+                "survive then science"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "mission-design",
+                "build-satellite"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [
+                "leo-orbit-one-lap"
+              ],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "people",
+          "title": "PEOPLE",
+          "titleTh": "คน",
+          "summary": "อาชีพและบทบาทในห่วงโซ่",
+          "children": [
+            {
+              "kind": "course",
+              "id": "space-careers",
+              "title": "SPACE CAREERS",
+              "titleTh": "เส้นทางอาชีพ",
+              "summary": "ระบบ ซอฟต์แวร์ ops ข้อมูล ผลิตภัณฑ์ในไทย",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "career"
+              ],
+              "teaches": [
+                "career paths in space tech"
+              ],
+              "audience": "คนที่วางเส้นทางอาชีพ",
+              "intentHints": [
+                "ทำงานด้านอวกาศ",
+                "อาชีพอวกาศไทย"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "career"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "who-flies-this",
+              "title": "WHO FLIES THIS",
+              "titleTh": "ทีมไหนทำอะไร",
+              "summary": "บทบาทคนในห่วงโซ่",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "career"
+              ],
+              "teaches": [
+                "roles in the chain"
+              ],
+              "audience": "คนที่อยากเห็นภาพทีม",
+              "intentHints": [
+                "ทีมภารกิจมีใครบ้าง"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "career",
+                "ops"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "folder",
+      "id": "more",
+      "title": "MORE",
+      "titleTh": "เส้นทางอื่น",
+      "summary": "ยังไม่นำร่อง แต่ยังเป็น Lunar ได้",
+      "children": [
+        {
+          "kind": "folder",
+          "id": "human",
+          "title": "HUMAN",
+          "titleTh": "มนุษย์ในอวกาศ",
+          "summary": "คนขึ้นไปและอยู่บนสถานี",
+          "children": [
+            {
+              "kind": "course",
+              "id": "human-spaceflight",
+              "title": "HUMAN SPACEFLIGHT",
+              "titleTh": "มนุษย์อวกาศ",
+              "summary": "คนขึ้นไป",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "human"
+              ],
+              "teaches": [
+                "human spaceflight intro"
+              ],
+              "audience": "คนที่สนใจมนุษย์ในอวกาศ",
+              "intentHints": [
+                "มนุษย์อวกาศ"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "human"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "living-in-orbit",
+              "title": "LIVING IN ORBIT",
+              "titleTh": "อยู่บนสถานี",
+              "summary": "ชีวิตประจำวันบนสถานี",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "human"
+              ],
+              "teaches": [
+                "life on station"
+              ],
+              "audience": "คนที่อยากรู้ชีวิตบนสถานี",
+              "intentHints": [
+                "อยู่บนสถานีอวกาศ"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "human"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "rules",
+          "title": "RULES",
+          "titleTh": "กติกา",
+          "summary": "นโยบาย คลื่น และกติกาท้องฟ้า",
+          "children": [
+            {
+              "kind": "course",
+              "id": "space-policy",
+              "title": "SPACE POLICY",
+              "titleTh": "นโยบายอวกาศ",
+              "summary": "ประเทศกับอวกาศ",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "policy"
+              ],
+              "teaches": [
+                "space policy intro"
+              ],
+              "audience": "คนที่สนใจนโยบาย",
+              "intentHints": [
+                "นโยบายอวกาศ"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "policy"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "who-owns-the-spectrum",
+              "title": "WHO OWNS THE SPECTRUM",
+              "titleTh": "คลื่นใครใช้ได้",
+              "summary": "สิทธิ์คลื่น",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "policy"
+              ],
+              "teaches": [
+                "spectrum rights intuition"
+              ],
+              "audience": "คนที่สนใจคลื่นสื่อสาร",
+              "intentHints": [
+                "คลื่นดาวเทียม",
+                "spectrum"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "policy",
+                "comms"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "rules-of-the-sky",
+              "title": "RULES OF THE SKY",
+              "titleTh": "กติกาขยะและสิทธิ์ทาง",
+              "summary": "ขยะ สิทธิ์ในวงโคจร",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "policy"
+              ],
+              "teaches": [
+                "orbital rules debris"
+              ],
+              "audience": "คนที่สนใจกติกาการใช้วงโคจร",
+              "intentHints": [
+                "กติกาขยะอวกาศ"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "policy"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "build",
+          "title": "BUILD",
+          "titleTh": "ทำให้ของจริง",
+          "summary": "จากโมเดลเป็นของที่ปล่อยได้",
+          "children": [
+            {
+              "kind": "course",
+              "id": "make-it-flight-ready",
+              "title": "MAKE IT FLIGHT-READY",
+              "titleTh": "สร้างให้บินได้",
+              "summary": "จากโมเดลเป็นของที่ปล่อยได้",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "build"
+              ],
+              "teaches": [
+                "flight readiness intuition"
+              ],
+              "audience": "คนที่อยากไปต่อจากบทเรียนสู่ของจริง",
+              "intentHints": [
+                "flight ready",
+                "สร้างดาวเทียมจริง"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "hardware",
+                "build-satellite"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "cleanroom-intuition",
+              "title": "CLEANROOM INTUITION",
+              "titleTh": "ห้องสะอาดทำไม",
+              "summary": "ทำไมประกอบของบินไม่ใช่โต๊ะบ้าน",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "build"
+              ],
+              "teaches": [
+                "why cleanroom"
+              ],
+              "audience": "คนที่สนใจกระบวนการผลิต",
+              "intentHints": [
+                "cleanroom",
+                "ห้องสะอาด"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "hardware"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        },
+        {
+          "kind": "folder",
+          "id": "go-farther",
+          "title": "GO FARTHER",
+          "titleTh": "ไปต่อ",
+          "summary": "ค้างวงและการออกจากโลก",
+          "children": [
+            {
+              "kind": "course",
+              "id": "staying-in-orbit",
+              "title": "STAYING IN ORBIT",
+              "titleTh": "ทำไมถึงค้างบนฟ้าได้",
+              "summary": "แรงต้าน อายุขัย ขับดันค้างวง",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "orbits"
+              ],
+              "teaches": [
+                "lifetime drag propulsion intuition"
+              ],
+              "audience": "คนที่สนใจอายุภารกิจ",
+              "intentHints": [
+                "ทำไมดาวเทียมตกลงมา",
+                "อายุวงโคจร"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "orbits",
+                "propulsion"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            },
+            {
+              "kind": "course",
+              "id": "going-farther",
+              "title": "GOING FARTHER",
+              "titleTh": "ออกจากวงโคจรโลก",
+              "summary": "ไปดวงจันทร์ / ลึกกว่า",
+              "status": "later",
+              "level": "intro",
+              "tags": [
+                "deep-space"
+              ],
+              "teaches": [
+                "leaving Earth orbit"
+              ],
+              "audience": "คนที่สนใจภารกิจไกล",
+              "intentHints": [
+                "ออกจากวงโคจรโลก"
+              ],
+              "prerequisites": [],
+              "relatedCourseIds": [],
+              "recommendWhen": [
+                "deep-space"
+              ],
+              "doNotConfuseWith": [],
+              "arenaHooks": [],
+              "outline": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

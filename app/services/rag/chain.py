@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.config import Settings
 from app.schemas.laika import AssistRequest, AssistResponse, LaikaSource
 from app.services.rag.context_window import build_human_prompt, trim_request_history
-from app.services.rag.prompts import INTENT_SYSTEM_PROMPTS, RetrievedChunk
+from app.services.rag.prompts import get_intent_system_prompt, RetrievedChunk
 from app.services.rag.providers import get_llm
 from app.services.rag.retriever import PgVectorRetriever
 from app.services.rag.sources import build_sources
@@ -107,7 +107,7 @@ class RagChain:
         rag_context = format_context(chunks)
         if web_context:
             rag_context = f"{rag_context}\n\n## Web search results\n\n{web_context}"
-        system_prompt = INTENT_SYSTEM_PROMPTS[trimmed_request.intent]
+        system_prompt = get_intent_system_prompt(trimmed_request.intent)
         human_prompt = build_human_prompt(
             trimmed_request, rag_context=rag_context, history=trimmed_request.messages,
         )
@@ -130,7 +130,7 @@ class RagChain:
 
     def _build_initial_messages(self, request: AssistRequest) -> list[BaseMessage]:
         trimmed_request, _ = trim_request_history(self._settings, request)
-        system_prompt = INTENT_SYSTEM_PROMPTS[trimmed_request.intent]
+        system_prompt = get_intent_system_prompt(trimmed_request.intent)
         human_prompt = build_human_prompt(trimmed_request, rag_context="", history=trimmed_request.messages)
         return [SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)]
 
