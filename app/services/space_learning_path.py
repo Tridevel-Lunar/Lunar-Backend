@@ -298,6 +298,20 @@ def iter_path_stream_sse(
         return
 
     messages: list = [SystemMessage(content=get_space_path_system_prompt())]
+    if request.currentPlan and request.currentPlan.steps:
+        plan = sanitize_proposal(request.currentPlan)
+        if plan.steps:
+            messages.append(
+                SystemMessage(
+                    content=(
+                        "Current map already on the learner's screen. "
+                        "Do NOT emit a ```path block unless they ask to change it, "
+                        "add/remove courses, fix the map, or confirm final. "
+                        "Casual chat and acknowledgments keep this map unchanged — Thai reply only.\n"
+                        f"{plan.model_dump_json(by_alias=True)}"
+                    )
+                )
+            )
     for item in history:
         if item.role == "user":
             messages.append(HumanMessage(content=item.content))

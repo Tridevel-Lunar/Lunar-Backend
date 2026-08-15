@@ -32,6 +32,9 @@ def test_space_path_prompt_includes_digest_and_opening() -> None:
     assert "Guardrails" in prompt
     assert "MAY answer briefly" in prompt
     assert "off-topic" in prompt
+    assert "when to emit" in prompt
+    assert "Do NOT emit" in prompt
+    assert "stable map" in prompt
 
 def test_sanitize_drops_unknown_course_ids() -> None:
     steps = sanitize_steps(

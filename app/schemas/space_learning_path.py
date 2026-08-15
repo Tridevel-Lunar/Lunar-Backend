@@ -55,3 +55,4 @@ class PathStreamRequest(BaseModel):
     content: str = Field(min_length=0, max_length=8000)
     messages: list[PathChatMessage] = Field(default_factory=list)
     client_now: str | None = None
+    currentPlan: PathProposal | None = None

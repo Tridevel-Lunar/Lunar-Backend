@@ -516,11 +516,13 @@ Clear the saved path (`204`) so the learner can plan again.
 
 Multi-turn Space path chat (SSE). No RAG. Auth required. LLM must be enabled (`laika_llm_enabled`).
 
-**Body:** `{ "content": "…", "messages": [{ "role": "user"|"assistant", "content": "…" }] }`
+**Body:** `{ "content": "…", "messages": [{ "role": "user"|"assistant", "content": "…" }], "currentPlan"? }`
+
+Optional `currentPlan` is the map already on screen (`intentTags`, `steps`, `edges`, `final`). When present, LAIKA should keep chatting without re-emitting ` ```path ` unless the learner asks to change the map.
 
 **Events:** `status`, `token` (spoken text only), `plan_delta` / `plan` (sanitized `{ intentTags, steps, edges, final }`), `done`, `error`.
 
-Server strips unknown course ids from every plan payload. After each successful turn, the server persists `chatTranscript`. When `plan` has `final: true`, steps/edges are also saved (`status: "active"`). Non-final turns leave `status: "draft"` until the learner saves or a final plan arrives.
+Server strips unknown course ids from every plan payload. After each successful turn, the server persists `chatTranscript`. When `plan` has `final: true`, steps/edges are also saved (`status: "active"`). Non-final turns leave `status: "draft"` until the learner saves or a final plan arrives. LAIKA should not emit a path fence on every turn — only when creating or intentionally changing the map.
 
 ---
 
